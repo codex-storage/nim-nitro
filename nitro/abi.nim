@@ -8,6 +8,7 @@ type
     bytes: seq[byte]
     tuples: seq[Tuple]
   Tuple = object
+    start: int
     postponed: seq[Split]
   Split = object
     head: Slice[int]
@@ -66,12 +67,12 @@ proc write*(writer: var AbiWriter, address: EthAddress) =
   writer.padleft(address.toArray)
 
 proc startTuple*(writer: var AbiWriter) =
-  writer.tuples.add(Tuple())
+  writer.tuples.add(Tuple(start: writer.bytes.len))
 
 proc finishTuple*(writer: var AbiWriter) =
   let tupl = writer.tuples.pop()
   for split in tupl.postponed:
-    let offset = writer.bytes.len - split.head.a
+    let offset = writer.bytes.len - tupl.start
     writer.bytes[split.head] = Abi.encode(offset.uint64)
     writer.bytes.add(split.tail)
 

@@ -80,9 +80,9 @@ suite "ABI encoding":
     writer.finishTuple()
     check writer.finish() ==
       Abi.encode(a) &
-      Abi.encode(3 * 32'u8) & # offset in tuple
+      Abi.encode(4 * 32'u8) & # offset from start of tuple
       Abi.encode(c) &
-      Abi.encode(3 * 32'u8) & # offset in tuple
+      Abi.encode(6 * 32'u8) & # offset from start of tuple
       Abi.encode(b) &
       Abi.encode(d)
 
@@ -102,9 +102,9 @@ suite "ABI encoding":
     writer.finishTuple()
     check writer.finish() ==
       Abi.encode(a) &
-      Abi.encode(5 * 32'u8) & # offset in tuple
+      Abi.encode(6 * 32'u8) & # offset from start of tuple
       Abi.encode(c) &
-      Abi.encode(1 * 32'u8) & # offset in tuple
+      Abi.encode(2 * 32'u8) & # offset from start of tuple
       Abi.encode(d) &
       Abi.encode(b)
 
@@ -136,7 +136,7 @@ suite "ABI encoding":
     writer.write(s)
     writer.finishTuple()
     check writer.finish() ==
-      Abi.encode(32'u8) & # offset in tuple
+      Abi.encode(32'u8) & # offset from start of tuple
       Abi.encode(s)
 
   test "encodes array of static elements as static element":
@@ -154,7 +154,7 @@ suite "ABI encoding":
     writer.write(a)
     writer.finishTuple()
     check writer.finish() ==
-      Abi.encode(32'u8) & # offset in tuple
+      Abi.encode(32'u8) & # offset from start of tuple
       Abi.encode(a)
 
 # https://medium.com/b2expand/abi-encoding-explanation-4f470927092d
