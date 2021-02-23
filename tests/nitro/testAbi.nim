@@ -1,5 +1,6 @@
 import std/unittest
 import pkg/nitro/abi
+import pkg/nitro/types
 import pkg/stint
 import ./examples
 
@@ -60,6 +61,10 @@ suite "ABI encoding":
     let bytes33 = @(array[33, byte].example)
     let bytes33len = Abi.encode(bytes33.len.uint64)
     check Abi.encode(bytes33) == bytes33len & bytes33 & 31.zeroes
+
+  test "encodes ethereum addresses":
+    let address = EthAddress.example
+    check Abi.encode(address) == 12.zeroes & @(address.toArray)
 
   test "encodes tuples":
     let a = true

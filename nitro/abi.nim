@@ -1,5 +1,6 @@
 import pkg/stew/endians2
 import pkg/stint
+import ./types
 
 type
   Abi* = object
@@ -60,6 +61,9 @@ proc write*(writer: var AbiWriter, bytes: seq[byte]) =
     writer.padright(bytes)
   else:
     writer.writeLater(bytes)
+
+proc write*(writer: var AbiWriter, address: EthAddress) =
+  writer.padleft(address.toArray)
 
 proc startTuple*(writer: var AbiWriter) =
   writer.tuples.add(Tuple())

@@ -24,6 +24,9 @@ proc example*(_: type UInt256): UInt256 =
 proc example*(_: type UInt128): UInt128 =
   UInt128.fromBytes(array[16, byte].example)
 
+proc example*(_: type EthAddress): EthAddress =
+  EthAddress(array[20, byte].example)
+
 proc example*(_: type Channel): Channel =
   Channel(
     nonce: UInt48.example,
