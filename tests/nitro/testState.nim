@@ -26,9 +26,11 @@ suite "state":
 
   test "hashes app part of state":
     var writer: AbiWriter
+    writer.startTuple()
     writer.write(state.challengeDuration)
     writer.write(state.appDefinition)
     writer.write(state.appData)
+    writer.finishTuple()
     let encoded = writer.finish()
     let hashed = keccak256.digest(encoded).data
     check hashAppPart(state) == hashed

@@ -44,9 +44,11 @@ proc variablePart*(state: State): VariablePart =
 
 proc hashAppPart*(state: State): array[32, byte] =
   var writer: AbiWriter
+  writer.startTuple()
   writer.write(state.challengeDuration)
   writer.write(state.appDefinition)
   writer.write(state.appData)
+  writer.finishTuple()
   keccak256.digest(writer.finish).data
 
 proc hashState*(state: State): array[32, byte] =
