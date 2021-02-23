@@ -6,7 +6,7 @@ export types
 export abi
 
 type
-  Outcome* = seq[AssetOutcome]
+  Outcome* = distinct seq[AssetOutcome]
   AssetOutcomeType* = enum
     allocationType = 0
     guaranteeType = 1
@@ -54,6 +54,11 @@ proc write*(writer: var AbiWriter, assetOutcome: AssetOutcome) =
   writer.startTuple()
   writer.write(assetOutcome.assetHolder)
   writer.write(content.finish())
+  writer.finishTuple()
+
+proc write*(writer: var AbiWriter, outcome: Outcome) =
+  writer.startTuple()
+  writer.write(seq[AssetOutcome](outcome))
   writer.finishTuple()
 
 proc hashOutcome*(outcome: Outcome): array[32, byte] =

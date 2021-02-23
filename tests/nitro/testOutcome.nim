@@ -59,6 +59,14 @@ suite "outcome":
     writer.finishTuple()
     check Abi.encode(assetOutcome) == writer.finish()
 
+  test "encodes outcomes":
+    let outcome = Outcome.example()
+    var writer: AbiWriter
+    writer.startTuple()
+    writer.write(seq[AssetOutcome](outcome))
+    writer.finishTuple()
+    check Abi.encode(outcome) == writer.finish()
+
   test "hashes outcomes":
     let outcome = Outcome.example
     let encoded = Abi.encode(outcome)

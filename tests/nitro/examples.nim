@@ -62,6 +62,9 @@ proc example*(_: type AssetOutcome): AssetOutcome =
       guarantee: Guarantee.example
     )
 
+proc example*(_: type Outcome): Outcome =
+  Outcome(seq[AssetOutcome].example)
+
 proc example*(_: type State): State =
   State(
     turnNum: UInt48.example,
