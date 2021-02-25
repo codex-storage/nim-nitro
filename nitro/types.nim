@@ -1,5 +1,6 @@
 import std/math
 import pkg/stint
+import pkg/stew/byteutils
 
 export stint
 
@@ -9,5 +10,8 @@ type
 
 proc toArray*(address: EthAddress): array[20, byte] =
   array[20, byte](address)
+
+proc fromHex*(_: type EthAddress, hex: string): EthAddress =
+  EthAddress(array[20, byte].fromHex(hex))
 
 proc `==`*(a, b: EthAddress): bool {.borrow.}

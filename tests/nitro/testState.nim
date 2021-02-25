@@ -1,5 +1,6 @@
 import std/unittest
 import pkg/nimcrypto
+import pkg/stew/byteutils
 import pkg/nitro
 import pkg/nitro/state
 import pkg/nitro/abi
@@ -20,31 +21,51 @@ suite "state":
 
   test "has a variable part":
     check state.variablePart == VariablePart(
-      outcome: Abi.encode(state.outcome),
+      outcome: AbiEncoder.encode(state.outcome),
       appData: state.appData
     )
 
   test "hashes app part of state":
-    var writer: AbiWriter
-    writer.startTuple()
-    writer.write(state.challengeDuration)
-    writer.write(state.appDefinition)
-    writer.write(state.appData)
-    writer.finishTuple()
-    let encoded = writer.finish()
+    var encoder= AbiEncoder.init()
+    encoder.startTuple()
+    encoder.write(state.challengeDuration)
+    encoder.write(state.appDefinition)
+    encoder.write(state.appData)
+    encoder.finishTuple()
+    let encoded = encoder.finish()
     let hashed = keccak256.digest(encoded).data
     check hashAppPart(state) == hashed
 
   test "hashes state":
-    var writer: AbiWriter
-    writer.startTuple()
-    writer.write(state.turnNum)
-    writer.write(state.isFinal)
-    writer.write(getChannelId(state.channel))
-    writer.write(hashAppPart(state))
-    writer.write(hashOutcome(state.outcome))
-    writer.finishTuple()
-    let encoded = writer.finish()
+    var encoder= AbiEncoder.init()
+    encoder.startTuple()
+    encoder.write(state.turnNum)
+    encoder.write(state.isFinal)
+    encoder.write(getChannelId(state.channel))
+    encoder.write(hashAppPart(state))
+    encoder.write(hashOutcome(state.outcome))
+    encoder.finishTuple()
+    let encoded = encoder.finish()
     let hashed = keccak256.digest(encoded).data
     check hashState(state) == hashed
 
+  test "produces the same hash as the javascript implementation":
+    let state = State(
+      channel: Channel(
+        chainId: 0x1.u256,
+        nonce: 1,
+        participants: @[
+          EthAddress.fromHex("DBE821484648c73C1996Da25f2355342B9803eBD")
+        ]
+      ),
+      outcome: Outcome(@[]),
+      turnNum: 1,
+      isFinal: false,
+      appData: @[0'u8],
+      appDefinition: EthAddress.default,
+      challengeDuration: 5
+    )
+    let expected = array[32, byte].fromHex(
+      "8f515b04e6120bffadc159b5e117297bb7c135337d4ec9c0468bcf298292f46d"
+    )
+    check hashState(state) == expected

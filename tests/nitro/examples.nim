@@ -46,6 +46,9 @@ proc example*(_: type Guarantee): Guarantee =
     destinations: seq[array[32, byte]].example
   )
 
+proc example*(_: type Allocation): Allocation =
+  Allocation(seq[AllocationItem].example)
+
 proc example*(_: type AssetOutcome): AssetOutcome =
   let kind = rand(AssetOutcomeType.low..AssetOutcomeType.high)
   case kind:

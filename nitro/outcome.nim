@@ -17,7 +17,7 @@ type
       allocation*: Allocation
     of guaranteeType:
       guarantee*: Guarantee
-  Allocation* = seq[AllocationItem]
+  Allocation* = distinct seq[AllocationItem]
   AllocationItem* = object
     destination*: array[32, byte]
     amount*: UInt256
@@ -25,41 +25,47 @@ type
     targetChannelId*: array[32, byte]
     destinations*: seq[array[32, byte]]
 
-proc isStatic*(_: type Abi, t: type AssetOutcome): bool = false
-proc isStatic*(_: type Abi, t: type AllocationItem): bool = true
-proc isStatic*(_: type Abi, t: type Guarantee): bool = false
+proc encode*(encoder: var AbiEncoder, guarantee: Guarantee) =
+  encoder.startTuple()
+  encoder.startTuple()
+  encoder.write(guarantee.targetChannelId)
+  encoder.write(guarantee.destinations)
+  encoder.finishTuple()
+  encoder.finishTuple()
 
-proc write*(writer: var AbiWriter, guarantee: Guarantee) =
-  writer.startTuple()
-  writer.write(guarantee.targetChannelId)
-  writer.write(guarantee.destinations)
-  writer.finishTuple()
+proc encode*(encoder: var AbiEncoder, item: AllocationItem) =
+  encoder.startTuple()
+  encoder.write(item.destination)
+  encoder.write(item.amount)
+  encoder.finishTuple()
 
-proc write*(writer: var AbiWriter, item: AllocationItem) =
-  writer.startTuple()
-  writer.write(item.destination)
-  writer.write(item.amount)
-  writer.finishTuple()
+proc encode*(encoder: var AbiEncoder, allocation: Allocation) =
+  encoder.startTuple()
+  encoder.write(seq[AllocationItem](allocation))
+  encoder.finishTuple()
 
-proc write*(writer: var AbiWriter, assetOutcome: AssetOutcome) =
-  var content: AbiWriter
+proc encode*(encoder: var AbiEncoder, assetOutcome: AssetOutcome) =
+  var content= AbiEncoder.init()
+  content.startTuple()
   content.startTuple()
   content.write(assetOutcome.kind)
   case assetOutcome.kind:
   of allocationType:
-    content.write(Abi.encode(assetOutcome.allocation))
+    content.write(AbiEncoder.encode(assetOutcome.allocation))
   of guaranteeType:
-    content.write(Abi.encode(assetOutcome.guarantee))
+    content.write(AbiEncoder.encode(assetOutcome.guarantee))
   content.finishTuple()
-  writer.startTuple()
-  writer.write(assetOutcome.assetHolder)
-  writer.write(content.finish())
-  writer.finishTuple()
+  content.finishTuple()
 
-proc write*(writer: var AbiWriter, outcome: Outcome) =
-  writer.startTuple()
-  writer.write(seq[AssetOutcome](outcome))
-  writer.finishTuple()
+  encoder.startTuple()
+  encoder.write(assetOutcome.assetHolder)
+  encoder.write(content.finish())
+  encoder.finishTuple()
+
+proc encode*(encoder: var AbiEncoder, outcome: Outcome) =
+  encoder.startTuple()
+  encoder.write(seq[AssetOutcome](outcome))
+  encoder.finishTuple()
 
 proc hashOutcome*(outcome: Outcome): array[32, byte] =
-  keccak256.digest(Abi.encode(outcome)).data
+  keccak256.digest(AbiEncoder.encode(outcome)).data
