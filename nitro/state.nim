@@ -4,6 +4,8 @@ import ./channel
 import ./outcome
 import ./abi
 
+include ./noerrors
+
 export types
 export channel
 export outcome
@@ -26,8 +28,6 @@ type
   VariablePart* = object
     outcome*: seq[byte]
     appdata*: seq[byte]
-
-{.push raises:[].}
 
 proc fixedPart*(state: State): FixedPart =
   FixedPart(

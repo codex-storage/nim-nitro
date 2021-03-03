@@ -2,6 +2,8 @@ import pkg/nimcrypto
 import ./abi
 import ./types
 
+include ./noerrors
+
 export types
 export abi
 
@@ -24,8 +26,6 @@ type
   Guarantee* = object
     targetChannelId*: array[32, byte]
     destinations*: seq[array[32, byte]]
-
-{.push raises:[].}
 
 proc encode*(encoder: var AbiEncoder, guarantee: Guarantee) =
   encoder.startTuple()

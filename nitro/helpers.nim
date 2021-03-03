@@ -1,13 +1,13 @@
 import std/options
 import pkg/stew/results
 
+include ./noerrors
+
 export options
 export results
 
-{.push raises:[].}
-
 proc toOption*[T, E](res: Result[T, E]): Option[T] =
   if res.isOk:
-    res.value.some
+    res.unsafeGet().some
   else:
     T.none

@@ -2,6 +2,8 @@ import pkg/stew/endians2
 import pkg/stint
 import ./types
 
+include ./noerrors
+
 type
   AbiEncoder* = object
     stack: seq[Tuple]
@@ -12,8 +14,6 @@ type
   Split = object
     head: Slice[int]
     tail: seq[byte]
-
-{.push raises:[].}
 
 proc write*[T](encoder: var AbiEncoder, value: T)
 proc encode*[T](_: type AbiEncoder, value: T): seq[byte]

@@ -2,6 +2,8 @@ import pkg/nimcrypto
 import ./abi
 import ./types
 
+include ./noerrors
+
 export types
 
 type
@@ -9,8 +11,6 @@ type
     nonce*: UInt48
     participants*: seq[EthAddress]
     chainId*: UInt256
-
-{.push raises:[].}
 
 proc getChannelId*(channel: Channel): array[32, byte] =
   var encoder= AbiEncoder.init()

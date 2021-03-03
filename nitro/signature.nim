@@ -5,6 +5,8 @@ import pkg/stew/byteutils
 import ./state
 import ./helpers
 
+include ./noerrors
+
 export options
 export toPublicKey
 
@@ -12,8 +14,6 @@ type
   PrivateKey* = SkSecretKey
   PublicKey* = SkPublicKey
   Signature* = SkRecoverableSignature
-
-{.push raises:[].}
 
 proc rng(data: var openArray[byte]): bool =
   randomBytes(data) == data.len
