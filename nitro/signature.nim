@@ -1,14 +1,19 @@
+import std/options
 import pkg/nimcrypto
 import pkg/secp256k1
 import pkg/stew/byteutils
 import ./state
+import ./helpers
 
+export options
 export toPublicKey
 
 type
   PrivateKey* = SkSecretKey
   PublicKey* = SkPublicKey
   Signature* = SkRecoverableSignature
+
+{.push raises:[].}
 
 proc rng(data: var openArray[byte]): bool =
   randomBytes(data) == data.len
@@ -19,8 +24,8 @@ proc random*(_: type PrivateKey): PrivateKey =
 proc `$`*(key: PrivateKey): string =
   key.toHex()
 
-proc parse*(_: type PrivateKey, s: string): PrivateKey =
-  SkSecretKey.fromHex(s).tryGet()
+proc parse*(_: type PrivateKey, s: string): Option[PrivateKey] =
+  SkSecretKey.fromHex(s).toOption()
 
 proc sign(key: PrivateKey, data: openArray[byte]): Signature =
   let hash = keccak256.digest(data).data
@@ -42,7 +47,10 @@ proc `$`*(signature: Signature): string =
   bytes[64] += 27
   bytes.toHex()
 
-proc parse*(_: type Signature, s: string): Signature =
-  var bytes = array[65, byte].fromHex(s)
-  bytes[64] -= 27
-  SkRecoverableSignature.fromRaw(bytes).tryGet()
+proc parse*(_: type Signature, s: string): Option[Signature] =
+  try:
+    var bytes = array[65, byte].fromHex(s)
+    bytes[64] = bytes[64] - 27
+    SkRecoverableSignature.fromRaw(bytes).toOption()
+  except ValueError:
+    Signature.none

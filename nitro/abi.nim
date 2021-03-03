@@ -13,6 +13,8 @@ type
     head: Slice[int]
     tail: seq[byte]
 
+{.push raises:[].}
+
 proc write*[T](encoder: var AbiEncoder, value: T)
 proc encode*[T](_: type AbiEncoder, value: T): seq[byte]
 

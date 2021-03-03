@@ -27,6 +27,8 @@ type
     outcome*: seq[byte]
     appdata*: seq[byte]
 
+{.push raises:[].}
+
 proc fixedPart*(state: State): FixedPart =
   FixedPart(
     chainId: state.channel.chainId,

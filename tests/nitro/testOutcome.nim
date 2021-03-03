@@ -94,7 +94,7 @@ suite "outcome":
         kind: allocationType,
         assetHolder: EthAddress.fromHex(
           "1E90B49563da16D2537CA1Ddd9b1285279103D93"
-        ),
+        ).get(),
         allocation: Allocation(@[
           AllocationItem(
             destination: array[32, byte].fromHex(
@@ -108,7 +108,7 @@ suite "outcome":
         kind: guaranteeType,
         assetHolder: EthAddress.fromHex(
           "1E90B49563da16D2537CA1Ddd9b1285279103D93"
-        ),
+        ).get(),
         guarantee: Guarantee(
           targetChannelId: array[32, byte].fromHex(
             "cac1bb71f0a97c8ac94ca9546b43178a9ad254c7b757ac07433aa6df35cd8089"

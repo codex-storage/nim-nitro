@@ -25,7 +25,7 @@ suite "channel":
       chainId: 9001.u256,
       nonce: 1,
       participants: @[
-        EthAddress.fromHex("24b905Dcc8A11C0FE57C2592f3D25f0447402C10")
+        EthAddress.fromHex("24b905Dcc8A11C0FE57C2592f3D25f0447402C10").get()
       ]
     )
     let expected = array[32, byte].fromHex(
