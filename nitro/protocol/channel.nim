@@ -1,8 +1,8 @@
 import pkg/nimcrypto
+import ../types
 import ./abi
-import ./types
 
-include ./noerrors
+include ../noerrors
 
 export types
 

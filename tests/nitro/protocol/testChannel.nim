@@ -1,6 +1,6 @@
 import std/unittest
-import pkg/nitro/channel
-import pkg/nitro/abi
+import pkg/nitro/protocol/channel
+import pkg/nitro/protocol/abi
 import pkg/nimcrypto
 import pkg/stew/byteutils
 import ./examples

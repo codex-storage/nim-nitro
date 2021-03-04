@@ -1,7 +1,7 @@
-import ./nitro/testAbi
-import ./nitro/testChannel
-import ./nitro/testOutcome
-import ./nitro/testState
-import ./nitro/testSignature
+import ./nitro/protocol/testAbi
+import ./nitro/protocol/testChannel
+import ./nitro/protocol/testOutcome
+import ./nitro/protocol/testState
+import ./nitro/protocol/testSignature
 
 {.warning[UnusedImport]: off.}

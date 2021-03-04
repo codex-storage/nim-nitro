@@ -2,10 +2,10 @@ import std/options
 import pkg/nimcrypto
 import pkg/secp256k1
 import pkg/stew/byteutils
+import ../helpers
 import ./state
-import ./helpers
 
-include ./noerrors
+include ../noerrors
 
 export options
 export toPublicKey

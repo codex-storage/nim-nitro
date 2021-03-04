@@ -1,6 +1,5 @@
 import std/unittest
-import pkg/nitro/abi
-import pkg/nitro/types
+import pkg/nitro/protocol/abi
 import pkg/stint
 import ./examples
 

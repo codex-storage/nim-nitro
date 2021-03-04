@@ -1,10 +1,10 @@
 import pkg/nimcrypto
-import ./types
+import ../types
 import ./channel
 import ./outcome
 import ./abi
 
-include ./noerrors
+include ../noerrors
 
 export types
 export channel

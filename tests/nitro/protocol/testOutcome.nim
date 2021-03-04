@@ -1,7 +1,8 @@
 import std/unittest
 import pkg/nimcrypto
 import pkg/stew/byteutils
-import pkg/nitro/outcome
+import pkg/nitro/protocol/abi
+import pkg/nitro/protocol/outcome
 import ./examples
 
 suite "outcome":

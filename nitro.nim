@@ -1,3 +1,3 @@
-import ./nitro/state
+import ./nitro/protocol
 
-export state
+export protocol
