@@ -1,5 +1,5 @@
-import ./basics
 import pkg/nitro/protocol/abi
+import ../basics
 
 suite "ABI encoding":
 

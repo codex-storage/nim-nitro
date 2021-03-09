@@ -1,7 +1,7 @@
-import ./basics
 import pkg/nitro/protocol/abi
 import pkg/nimcrypto
 import pkg/stew/byteutils
+import ../basics
 
 suite "outcome":
 

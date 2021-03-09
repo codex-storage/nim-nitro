@@ -1,7 +1,7 @@
-import ./basics
 import pkg/nimcrypto
 import pkg/secp256k1
 import pkg/stew/byteutils
+import ../basics
 
 suite "signature":
 
