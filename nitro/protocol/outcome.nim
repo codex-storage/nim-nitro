@@ -1,10 +1,10 @@
 import pkg/nimcrypto
-import ../types
+import ../basics
 import ./abi
 
 include questionable/errorban
 
-export types
+export basics
 
 type
   Outcome* = distinct seq[AssetOutcome]

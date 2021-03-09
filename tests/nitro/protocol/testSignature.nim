@@ -1,10 +1,7 @@
-import std/unittest
+import ./basics
 import pkg/nimcrypto
 import pkg/secp256k1
 import pkg/stew/byteutils
-import pkg/nitro/protocol/state
-import pkg/nitro/protocol/signature
-import ./examples
 
 suite "signature":
 

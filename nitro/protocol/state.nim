@@ -1,12 +1,12 @@
 import pkg/nimcrypto
-import ../types
+import ../basics
 import ./channel
 import ./outcome
 import ./abi
 
 include questionable/errorban
 
-export types
+export basics
 export channel
 export outcome
 

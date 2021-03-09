@@ -1,13 +1,12 @@
-import pkg/questionable
-import pkg/questionable/results
-import pkg/nimcrypto
 import pkg/secp256k1
+import pkg/nimcrypto
 import pkg/stew/byteutils
+import ../basics
 import ./state
 
 include questionable/errorban
 
-export questionable
+export basics
 export toPublicKey
 
 type
