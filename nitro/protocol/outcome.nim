@@ -36,6 +36,21 @@ proc init*(_: type Outcome,
   )
   Outcome(@[assetOutcome])
 
+proc `==`*(a, b: Allocation): bool {.borrow.}
+
+proc `==`*(a, b: AssetOutcome): bool =
+  if a.kind != b.kind:
+    return false
+  if a.assetHolder != b.assetHolder:
+    return false
+  case a.kind:
+    of allocationType:
+      a.allocation == b.allocation
+    of guaranteeType:
+      a.guarantee == b.guarantee
+
+proc `==`*(a, b: Outcome): bool {.borrow.}
+
 proc encode*(encoder: var AbiEncoder, guarantee: Guarantee) =
   encoder.startTuple()
   encoder.startTuple()
