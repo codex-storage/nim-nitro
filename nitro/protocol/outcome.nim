@@ -2,7 +2,7 @@ import pkg/nimcrypto
 import ../types
 import ./abi
 
-include ../noerrors
+include questionable/errorban
 
 export types
 

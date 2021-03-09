@@ -1,13 +1,13 @@
-import std/options
+import pkg/questionable
+import pkg/questionable/results
 import pkg/nimcrypto
 import pkg/secp256k1
 import pkg/stew/byteutils
-import ../helpers
 import ./state
 
-include ../noerrors
+include questionable/errorban
 
-export options
+export questionable
 export toPublicKey
 
 type
@@ -24,7 +24,7 @@ proc random*(_: type PrivateKey): PrivateKey =
 proc `$`*(key: PrivateKey): string =
   key.toHex()
 
-proc parse*(_: type PrivateKey, s: string): Option[PrivateKey] =
+proc parse*(_: type PrivateKey, s: string): ?PrivateKey =
   SkSecretKey.fromHex(s).toOption()
 
 proc sign(key: PrivateKey, data: openArray[byte]): Signature =
@@ -47,10 +47,9 @@ proc `$`*(signature: Signature): string =
   bytes[64] += 27
   bytes.toHex()
 
-proc parse*(_: type Signature, s: string): Option[Signature] =
-  try:
+proc parse*(_: type Signature, s: string): ?Signature =
+  let signature = catch:
     var bytes = array[65, byte].fromHex(s)
     bytes[64] = bytes[64] - 27
-    SkRecoverableSignature.fromRaw(bytes).toOption()
-  except ValueError:
-    Signature.none
+    SkRecoverableSignature.fromRaw(bytes).get()
+  signature.toOption()

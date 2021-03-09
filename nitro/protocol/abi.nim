@@ -2,7 +2,7 @@ import pkg/stew/endians2
 import pkg/stint
 import ../types
 
-include ../noerrors
+include questionable/errorban
 
 export types
 

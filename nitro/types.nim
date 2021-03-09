@@ -1,12 +1,12 @@
 import std/math
-import std/options
+import pkg/questionable
 import pkg/stint
 import pkg/stew/byteutils
 
-include ./noerrors
+include questionable/errorban
 
 export stint
-export options
+export questionable
 
 type
   UInt48* = range[0'u64..2'u64^48-1]
@@ -15,7 +15,7 @@ type
 proc toArray*(address: EthAddress): array[20, byte] =
   array[20, byte](address)
 
-proc fromHex*(_: type EthAddress, hex: string): Option[EthAddress] =
+proc fromHex*(_: type EthAddress, hex: string): ?EthAddress =
   try:
     EthAddress(array[20, byte].fromHex(hex)).some
   except ValueError:

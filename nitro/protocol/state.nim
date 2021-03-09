@@ -4,7 +4,7 @@ import ./channel
 import ./outcome
 import ./abi
 
-include ../noerrors
+include questionable/errorban
 
 export types
 export channel
