@@ -2,29 +2,15 @@ import pkg/secp256k1
 import pkg/nimcrypto
 import pkg/stew/byteutils
 import ../basics
+import ../keys
 import ./state
 
 include questionable/errorban
 
 export basics
-export toPublicKey
+export keys
 
-type
-  PrivateKey* = SkSecretKey
-  PublicKey* = SkPublicKey
-  Signature* = SkRecoverableSignature
-
-proc rng(data: var openArray[byte]): bool =
-  randomBytes(data) == data.len
-
-proc random*(_: type PrivateKey): PrivateKey =
-  PrivateKey.random(rng).get()
-
-proc `$`*(key: PrivateKey): string =
-  key.toHex()
-
-proc parse*(_: type PrivateKey, s: string): ?PrivateKey =
-  SkSecretKey.fromHex(s).toOption()
+type Signature* = SkRecoverableSignature
 
 proc sign(key: PrivateKey, data: openArray[byte]): Signature =
   let hash = keccak256.digest(data).data
