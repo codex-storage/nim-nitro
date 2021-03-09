@@ -22,3 +22,10 @@ proc `$`*(key: PrivateKey): string =
 
 proc parse*(_: type PrivateKey, s: string): ?PrivateKey =
   SkSecretKey.fromHex(s).toOption()
+
+proc toAddress*(key: PublicKey): EthAddress =
+  let hash = keccak256.digest(key.toRaw())
+  var bytes: array[20, byte]
+  for i in 0..<20:
+    bytes[i] = hash.data[12 + i]
+  EthAddress(bytes)
