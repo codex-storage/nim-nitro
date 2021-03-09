@@ -96,9 +96,9 @@ suite "outcome":
         ).get(),
         allocation: Allocation(@[
           AllocationItem(
-            destination: array[32, byte].fromHex(
+            destination: Destination.parse(
               "f1918e8562236eb17adc8502332f4c9c82bc14e19bfc0aa10ab674ff75b3d2f3"
-            ),
+            ).get(),
             amount: 0x05.u256
           )
         ])
@@ -109,13 +109,13 @@ suite "outcome":
           "1E90B49563da16D2537CA1Ddd9b1285279103D93"
         ).get(),
         guarantee: Guarantee(
-          targetChannelId: array[32, byte].fromHex(
+          targetChannelId: Destination.parse(
             "cac1bb71f0a97c8ac94ca9546b43178a9ad254c7b757ac07433aa6df35cd8089"
-          ),
+          ).get(),
           destinations: @[
-            array[32, byte].fromHex(
+            Destination.parse(
               "f1918e8562236eb17adc8502332f4c9c82bc14e19bfc0aa10ab674ff75b3d2f3"
-            )
+            ).get()
           ]
         )
       )

@@ -99,6 +99,9 @@ proc encode(encoder: var AbiEncoder, bytes: seq[byte]) =
 proc encode(encoder: var AbiEncoder, address: EthAddress) =
   encoder.padleft(address.toArray)
 
+proc encode(encoder: var AbiEncoder, destination: Destination) =
+  encoder.encode(destination.toArray)
+
 proc encode[I, T](encoder: var AbiEncoder, value: array[I, T]) =
   encoder.startTuple()
   for element in value:

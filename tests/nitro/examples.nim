@@ -27,6 +27,9 @@ proc example*(_: type UInt128): UInt128 =
 proc example*(_: type EthAddress): EthAddress =
   EthAddress(array[20, byte].example)
 
+proc example*(_: type Destination): Destination =
+  Destination(array[32, byte].example)
+
 proc example*(_: type ChannelDefinition): ChannelDefinition =
   ChannelDefinition(
     nonce: UInt48.example,
@@ -36,14 +39,14 @@ proc example*(_: type ChannelDefinition): ChannelDefinition =
 
 proc example*(_: type AllocationItem): AllocationItem =
   AllocationItem(
-    destination: array[32, byte].example,
+    destination: Destination.example,
     amount: UInt256.example
   )
 
 proc example*(_: type Guarantee): Guarantee =
   Guarantee(
-    targetChannelId: array[32, byte].example,
-    destinations: seq[array[32, byte]].example
+    targetChannelId: Destination.example,
+    destinations: seq[Destination].example
   )
 
 proc example*(_: type Allocation): Allocation =

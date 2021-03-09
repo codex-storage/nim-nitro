@@ -12,11 +12,11 @@ type
     participants*: seq[EthAddress]
     chainId*: UInt256
 
-proc getChannelId*(channel: ChannelDefinition): array[32, byte] =
+proc getChannelId*(channel: ChannelDefinition): Destination =
   var encoder= AbiEncoder.init()
   encoder.startTuple()
   encoder.write(channel.chainId)
   encoder.write(channel.participants)
   encoder.write(channel.nonce)
   encoder.finishTuple()
-  keccak256.digest(encoder.finish()).data
+  Destination(keccak256.digest(encoder.finish()).data)

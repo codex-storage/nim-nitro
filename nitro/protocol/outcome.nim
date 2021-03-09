@@ -20,11 +20,11 @@ type
       guarantee*: Guarantee
   Allocation* = distinct seq[AllocationItem]
   AllocationItem* = object
-    destination*: array[32, byte]
+    destination*: Destination
     amount*: UInt256
   Guarantee* = object
-    targetChannelId*: array[32, byte]
-    destinations*: seq[array[32, byte]]
+    targetChannelId*: Destination
+    destinations*: seq[Destination]
 
 proc encode*(encoder: var AbiEncoder, guarantee: Guarantee) =
   encoder.startTuple()
