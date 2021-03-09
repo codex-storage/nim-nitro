@@ -14,7 +14,7 @@ type
   State* = object
     turnNum*: UInt48
     isFinal*: bool
-    channel*: Channel
+    channel*: ChannelDefinition
     challengeDuration*: UInt48
     outcome*: Outcome
     appDefinition*: EthAddress

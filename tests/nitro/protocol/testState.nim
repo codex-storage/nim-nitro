@@ -48,7 +48,7 @@ suite "state":
 
   test "produces the same hash as the javascript implementation":
     let state = State(
-      channel: Channel(
+      channel: ChannelDefinition(
         chainId: 0x1.u256,
         nonce: 1,
         participants: @[

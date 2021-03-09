@@ -19,7 +19,7 @@ suite "signature":
 
   test "produces the same signatures as the javascript implementation":
     let state =State(
-      channel: Channel(
+      channel: ChannelDefinition(
         chainId: 0x1.u256,
         nonce: 1,
         participants: @[

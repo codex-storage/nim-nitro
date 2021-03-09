@@ -7,12 +7,12 @@ include questionable/errorban
 export basics
 
 type
-  Channel* = object
+  ChannelDefinition* = object
     nonce*: UInt48
     participants*: seq[EthAddress]
     chainId*: UInt256
 
-proc getChannelId*(channel: Channel): array[32, byte] =
+proc getChannelId*(channel: ChannelDefinition): array[32, byte] =
   var encoder= AbiEncoder.init()
   encoder.startTuple()
   encoder.write(channel.chainId)

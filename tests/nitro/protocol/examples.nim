@@ -27,8 +27,8 @@ proc example*(_: type UInt128): UInt128 =
 proc example*(_: type EthAddress): EthAddress =
   EthAddress(array[20, byte].example)
 
-proc example*(_: type Channel): Channel =
-  Channel(
+proc example*(_: type ChannelDefinition): ChannelDefinition =
+  ChannelDefinition(
     nonce: UInt48.example,
     participants: seq[EthAddress].example(2..5),
     chainId: UInt256.example
@@ -72,7 +72,7 @@ proc example*(_: type State): State =
   State(
     turnNum: UInt48.example,
     isFinal: bool.example,
-    channel: Channel.example,
+    channel: ChannelDefinition.example,
     challengeDuration: UInt48.example,
     outcome: Outcome.example,
     appDefinition: EthAddress.example,

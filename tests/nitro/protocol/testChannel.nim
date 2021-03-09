@@ -3,9 +3,9 @@ import pkg/nitro/protocol/abi
 import pkg/nimcrypto
 import pkg/stew/byteutils
 
-suite "channel":
+suite "channel definition":
 
-  let channel = Channel.example
+  let channel = ChannelDefinition.example
 
   test "calculates channel id":
     var encoder= AbiEncoder.init()
@@ -19,7 +19,7 @@ suite "channel":
     check getChannelId(channel) == hashed
 
   test "produces same id as javascript implementation":
-    let channel = Channel(
+    let channel = ChannelDefinition(
       chainId: 9001.u256,
       nonce: 1,
       participants: @[
