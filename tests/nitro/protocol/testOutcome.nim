@@ -1,6 +1,5 @@
 import pkg/nitro/protocol/abi
 import pkg/nimcrypto
-import pkg/stew/byteutils
 import ../basics
 
 suite "outcome":
@@ -91,7 +90,7 @@ suite "outcome":
     let outcome = Outcome(@[
       AssetOutcome(
         kind: allocationType,
-        assetHolder: EthAddress.fromHex(
+        assetHolder: EthAddress.parse(
           "1E90B49563da16D2537CA1Ddd9b1285279103D93"
         ).get(),
         allocation: Allocation(@[
@@ -105,7 +104,7 @@ suite "outcome":
       ),
       AssetOutcome(
         kind: guaranteeType,
-        assetHolder: EthAddress.fromHex(
+        assetHolder: EthAddress.parse(
           "1E90B49563da16D2537CA1Ddd9b1285279103D93"
         ).get(),
         guarantee: Guarantee(
