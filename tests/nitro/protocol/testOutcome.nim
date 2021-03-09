@@ -94,7 +94,7 @@ suite "outcome":
           "1E90B49563da16D2537CA1Ddd9b1285279103D93"
         ).get(),
         allocation: Allocation(@[
-          AllocationItem(
+          (
             destination: Destination.parse(
               "f1918e8562236eb17adc8502332f4c9c82bc14e19bfc0aa10ab674ff75b3d2f3"
             ).get(),

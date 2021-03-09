@@ -38,10 +38,7 @@ proc example*(_: type ChannelDefinition): ChannelDefinition =
   )
 
 proc example*(_: type AllocationItem): AllocationItem =
-  AllocationItem(
-    destination: Destination.example,
-    amount: UInt256.example
-  )
+  (Destination.example, UInt256.example)
 
 proc example*(_: type Guarantee): Guarantee =
   Guarantee(

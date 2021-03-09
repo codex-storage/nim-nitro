@@ -19,12 +19,22 @@ type
     of guaranteeType:
       guarantee*: Guarantee
   Allocation* = distinct seq[AllocationItem]
-  AllocationItem* = object
-    destination*: Destination
-    amount*: UInt256
+  AllocationItem* = tuple
+    destination: Destination
+    amount: UInt256
   Guarantee* = object
     targetChannelId*: Destination
     destinations*: seq[Destination]
+
+proc init*(_: type Outcome,
+           asset: EthAddress,
+           allocation: openArray[AllocationItem]): Outcome =
+  let assetOutcome = AssetOutcome(
+    kind: allocationType,
+    assetHolder: asset,
+    allocation: Allocation(@allocation)
+  )
+  Outcome(@[assetOutcome])
 
 proc encode*(encoder: var AbiEncoder, guarantee: Guarantee) =
   encoder.startTuple()
