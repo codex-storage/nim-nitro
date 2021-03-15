@@ -12,8 +12,8 @@ type
     key: PrivateKey
     channels: seq[Channel]
   Channel* = object
-    latest*, upcoming*: ?StateUpdate
-  StateUpdate* = object
+    latest*, upcoming*: ?ChannelUpdate
+  ChannelUpdate* = object
     state*: State
     signatures*: seq[(EthAddress, Signature)]
 
@@ -28,5 +28,8 @@ proc openLedger*(wallet: Wallet, asset: EthAddress, amount: UInt256): Channel =
   let outcome = Outcome.init(asset, {me: amount})
   let state = State(outcome: outcome)
   let signature = wallet.key.sign(state)
-  let update = StateUpdate(state: state, signatures: @{wallet.address: signature})
+  let update = ChannelUpdate(
+    state: state,
+    signatures: @{wallet.address: signature}
+  )
   Channel(upcoming: update.some)
