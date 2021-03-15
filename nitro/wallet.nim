@@ -10,7 +10,7 @@ export keys
 type
   Wallet* = object
     key: PrivateKey
-    channels: seq[Channel]
+    channels*: seq[Channel]
   Channel* = object
     latest*, upcoming*: ?ChannelUpdate
   ChannelUpdate* = object
@@ -23,13 +23,25 @@ proc init*(_: type Wallet, key: PrivateKey): Wallet =
 proc address*(wallet: Wallet): EthAddress =
   wallet.key.toPublicKey.toAddress
 
-proc openLedger*(wallet: Wallet, asset: EthAddress, amount: UInt256): Channel =
-  let me = wallet.address.toDestination
-  let outcome = Outcome.init(asset, {me: amount})
-  let state = State(outcome: outcome)
-  let signature = wallet.key.sign(state)
-  let update = ChannelUpdate(
-    state: state,
-    signatures: @{wallet.address: signature}
+proc openLedgerChannel*(wallet: var Wallet,
+                        hub: EthAddress,
+                        chainId: UInt256,
+                        nonce: UInt48,
+                        asset: EthAddress,
+                        amount: UInt256): Channel =
+  let state = State(
+    channel: ChannelDefinition(
+      chainId: chainId,
+      participants: @[wallet.address, hub],
+      nonce: nonce
+    ),
+    outcome: Outcome.init(asset, {wallet.address.toDestination: amount})
   )
-  Channel(upcoming: update.some)
+  let channel = Channel(
+    upcoming: ChannelUpdate(
+      state: state,
+      signatures: @{wallet.address: wallet.key.sign(state)}
+    ).some
+  )
+  wallet.channels.add(channel)
+  channel
