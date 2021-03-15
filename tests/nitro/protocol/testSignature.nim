@@ -17,6 +17,14 @@ suite "signature":
     let hash = keccak256.digest(data).data
     check recover(signature, SkMessage(hash)).tryGet() == publicKey
 
+  test "recovers ethereum address from signature":
+    let state1, state2 = State.example
+    let key = PrivateKey.random()
+    let address = key.toPublicKey.toAddress
+    let signature = key.sign(state1)
+    check recover(signature, state1) == address.some
+    check recover(signature, state2) != address.some
+
   test "produces the same signatures as the javascript implementation":
     let state =State(
       channel: ChannelDefinition(

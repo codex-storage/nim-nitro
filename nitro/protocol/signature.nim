@@ -12,20 +12,27 @@ export keys
 
 type Signature* = SkRecoverableSignature
 
-proc sign(key: PrivateKey, data: openArray[byte]): Signature =
-  let hash = keccak256.digest(data).data
-  key.signRecoverable(SkMessage(hash))
-
-proc signMessage(key: PrivateKey, message: openArray[byte]): Signature =
+proc hashMessage(message: openArray[byte]): array[32, byte] =
   # https://eips.ethereum.org/EIPS/eip-191
   var data: seq[byte]
   data.add("\x19Ethereum Signed Message:\n".toBytes)
   data.add(($message.len).toBytes)
   data.add(message)
-  key.sign(data)
+  keccak256.digest(data).data
+
+proc sign(key: PrivateKey, hash: array[32, byte]): Signature =
+  key.signRecoverable(SkMessage(hash))
 
 proc sign*(key: PrivateKey, state: State): Signature =
-  key.signMessage(hashState(state))
+  let hash = hashMessage(hashState(state))
+  key.sign(hash)
+
+proc recover(signature: Signature, hash: array[32, byte]): ?PublicKey =
+  recover(signature, SkMessage(hash)).option
+
+proc recover*(signature: Signature, state: State): ?EthAddress =
+  let hash = hashMessage(hashState(state))
+  recover(signature, hash)?.toAddress
 
 proc `$`*(signature: Signature): string =
   var bytes = signature.toRaw()
