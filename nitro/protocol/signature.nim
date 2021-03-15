@@ -37,4 +37,4 @@ proc parse*(_: type Signature, s: string): ?Signature =
     var bytes = array[65, byte].fromHex(s)
     bytes[64] = bytes[64] - 27
     SkRecoverableSignature.fromRaw(bytes).get()
-  signature.toOption()
+  signature.option

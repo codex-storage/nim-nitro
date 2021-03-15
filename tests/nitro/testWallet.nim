@@ -18,5 +18,6 @@ suite "nitro wallet":
     let expectedState = State(outcome: expectedOutcome)
     let expectedSignatures = @{wallet.address: key.sign(expectedState)}
     check channel.latest.isNone
-    check channel.upcoming.?state == expectedState.some
-    check channel.upcoming.?signatures == expectedSignatures.some
+    check channel.upcoming?.state == expectedState.some
+    check channel.upcoming?.signatures == expectedSignatures.some
+

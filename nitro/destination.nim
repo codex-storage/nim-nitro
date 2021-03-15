@@ -14,7 +14,7 @@ proc `$`*(destination: Destination): string =
   destination.toArray().toHex()
 
 proc parse*(_: type Destination, s: string): ?Destination =
-   Destination(array[32, byte].fromHex(s)).catch.toOption()
+   Destination(array[32, byte].fromHex(s)).catch.option
 
 proc `==`*(a, b: Destination): bool {.borrow.}
 

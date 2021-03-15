@@ -21,7 +21,7 @@ proc `$`*(key: PrivateKey): string =
   key.toHex()
 
 proc parse*(_: type PrivateKey, s: string): ?PrivateKey =
-  SkSecretKey.fromHex(s).toOption()
+  SkSecretKey.fromHex(s).option
 
 proc toAddress*(key: PublicKey): EthAddress =
   let hash = keccak256.digest(key.toRaw())
