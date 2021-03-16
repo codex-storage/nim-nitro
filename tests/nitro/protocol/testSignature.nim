@@ -18,12 +18,21 @@ suite "signature":
     check recover(signature, SkMessage(hash)).tryGet() == publicKey
 
   test "recovers ethereum address from signature":
-    let state1, state2 = State.example
+    let state = State.example
     let key = PrivateKey.random()
     let address = key.toPublicKey.toAddress
-    let signature = key.sign(state1)
-    check recover(signature, state1) == address.some
-    check recover(signature, state2) != address.some
+    let signature = key.sign(state)
+    check recover(signature, state) == address.some
+    check recover(signature, State.example) != address.some
+
+  test "verifies signatures":
+    let state = State.example
+    let key = PrivateKey.random()
+    let address = key.toPublicKey.toAddress
+    let signature = key.sign(state)
+    check verify(signature, state, address)
+    check not verify(signature, state, EthAddress.example)
+    check not verify(signature, State.example, address)
 
   test "produces the same signatures as the javascript implementation":
     let state =State(

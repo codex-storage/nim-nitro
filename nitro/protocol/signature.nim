@@ -34,6 +34,9 @@ proc recover*(signature: Signature, state: State): ?EthAddress =
   let hash = hashMessage(hashState(state))
   recover(signature, hash)?.toAddress
 
+proc verify*(signature: Signature, state: State, signer: EthAddress): bool =
+  recover(signature, state) == signer.some
+
 proc `$`*(signature: Signature): string =
   var bytes = signature.toRaw()
   bytes[64] += 27
