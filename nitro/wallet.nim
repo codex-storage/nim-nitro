@@ -1,21 +1,21 @@
 import ./basics
 import ./keys
 import ./protocol
+import ./channelupdate
+import ./ledger
 
 include questionable/errorban
 
 export basics
 export keys
+export channelupdate
 
 type
   Wallet* = object
     key: PrivateKey
     channels*: seq[Channel]
   Channel* = object
-    latest*, upcoming*: ?ChannelUpdate
-  ChannelUpdate* = object
-    state*: State
-    signatures*: seq[(EthAddress, Signature)]
+    latest*: ChannelUpdate
 
 proc init*(_: type Wallet, key: PrivateKey): Wallet =
   result.key = key
@@ -23,25 +23,31 @@ proc init*(_: type Wallet, key: PrivateKey): Wallet =
 proc address*(wallet: Wallet): EthAddress =
   wallet.key.toPublicKey.toAddress
 
+proc sign(wallet: Wallet, update: ChannelUpdate): ChannelUpdate =
+  var signed = update
+  signed.signatures &= @{wallet.address: wallet.key.sign(update.state)}
+  signed
+
+proc createChannel(wallet: var Wallet, update: ChannelUpdate): Channel =
+  let signed = wallet.sign(update)
+  let channel = Channel(latest: signed)
+  wallet.channels.add(channel)
+  channel
+
 proc openLedgerChannel*(wallet: var Wallet,
                         hub: EthAddress,
                         chainId: UInt256,
                         nonce: UInt48,
                         asset: EthAddress,
                         amount: UInt256): Channel =
-  let state = State(
-    channel: ChannelDefinition(
-      chainId: chainId,
-      participants: @[wallet.address, hub],
-      nonce: nonce
-    ),
-    outcome: Outcome.init(asset, {wallet.address.toDestination: amount})
-  )
-  let channel = Channel(
-    upcoming: ChannelUpdate(
-      state: state,
-      signatures: @{wallet.address: wallet.key.sign(state)}
-    ).some
-  )
-  wallet.channels.add(channel)
-  channel
+  let update = startLedger(wallet.address, hub, chainId, nonce, asset, amount)
+  wallet.createChannel(update)
+
+proc acceptChannel*(wallet: var Wallet, update: ChannelUpdate): ?!Channel =
+  if not update.participants.contains(wallet.address):
+    return Channel.failure "wallet owner is not a participant"
+
+  if not verifySignatures(update):
+    return Channel.failure "incorrect signatures"
+
+  wallet.createChannel(update).success
