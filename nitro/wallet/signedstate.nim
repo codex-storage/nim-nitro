@@ -1,5 +1,5 @@
-import ./basics
-import ./protocol
+import ../basics
+import ../protocol
 
 include questionable/errorban
 

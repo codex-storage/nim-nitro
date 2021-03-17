@@ -1,6 +1,6 @@
-import ./basics
+import ../basics
+import ../protocol
 import ./signedstate
-import ./protocol
 
 func startLedger*(me: EthAddress,
                   hub: EthAddress,
