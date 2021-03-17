@@ -8,12 +8,12 @@ type
     state*: State
     signatures*: seq[(EthAddress, Signature)]
 
-func participants*(signed: SignedState): seq[EthAddress] =
-  signed.state.channel.participants
+func hasParticipant*(signed: SignedState, participant: EthAddress): bool =
+  signed.state.channel.participants.contains(participant)
 
 func verifySignatures*(signed: SignedState): bool =
   for (participant, signature) in signed.signatures:
-    if not signed.participants.contains(participant):
+    if not signed.hasParticipant(participant):
       return false
     if not signature.verify(signed.state, participant):
       return false

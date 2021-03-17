@@ -46,11 +46,11 @@ func openLedgerChannel*(wallet: var Wallet,
   let state = startLedger(wallet.address, hub, chainId, nonce, asset, amount)
   wallet.createChannel(state)
 
-func acceptChannel*(wallet: var Wallet, state: SignedState): ?!ChannelId =
-  if not state.participants.contains(wallet.address):
+func acceptChannel*(wallet: var Wallet, signed: SignedState): ?!ChannelId =
+  if not signed.hasParticipant(wallet.address):
     return ChannelId.failure "wallet owner is not a participant"
 
-  if not verifySignatures(state):
+  if not verifySignatures(signed):
     return ChannelId.failure "incorrect signatures"
 
-  wallet.createChannel(state).success
+  wallet.createChannel(signed).success
