@@ -26,7 +26,7 @@ type
     targetChannelId*: Destination
     destinations*: seq[Destination]
 
-proc init*(_: type Outcome,
+func init*(_: type Outcome,
            asset: EthAddress,
            allocation: openArray[AllocationItem]): Outcome =
   let assetOutcome = AssetOutcome(
@@ -36,9 +36,9 @@ proc init*(_: type Outcome,
   )
   Outcome(@[assetOutcome])
 
-proc `==`*(a, b: Allocation): bool {.borrow.}
+func `==`*(a, b: Allocation): bool {.borrow.}
 
-proc `==`*(a, b: AssetOutcome): bool =
+func `==`*(a, b: AssetOutcome): bool =
   if a.kind != b.kind:
     return false
   if a.assetHolder != b.assetHolder:
@@ -49,9 +49,9 @@ proc `==`*(a, b: AssetOutcome): bool =
     of guaranteeType:
       a.guarantee == b.guarantee
 
-proc `==`*(a, b: Outcome): bool {.borrow.}
+func `==`*(a, b: Outcome): bool {.borrow.}
 
-proc encode*(encoder: var AbiEncoder, guarantee: Guarantee) =
+func encode*(encoder: var AbiEncoder, guarantee: Guarantee) =
   encoder.startTuple()
   encoder.startTuple()
   encoder.write(guarantee.targetChannelId)
@@ -59,18 +59,18 @@ proc encode*(encoder: var AbiEncoder, guarantee: Guarantee) =
   encoder.finishTuple()
   encoder.finishTuple()
 
-proc encode*(encoder: var AbiEncoder, item: AllocationItem) =
+func encode*(encoder: var AbiEncoder, item: AllocationItem) =
   encoder.startTuple()
   encoder.write(item.destination)
   encoder.write(item.amount)
   encoder.finishTuple()
 
-proc encode*(encoder: var AbiEncoder, allocation: Allocation) =
+func encode*(encoder: var AbiEncoder, allocation: Allocation) =
   encoder.startTuple()
   encoder.write(seq[AllocationItem](allocation))
   encoder.finishTuple()
 
-proc encode*(encoder: var AbiEncoder, assetOutcome: AssetOutcome) =
+func encode*(encoder: var AbiEncoder, assetOutcome: AssetOutcome) =
   var content= AbiEncoder.init()
   content.startTuple()
   content.startTuple()
@@ -88,10 +88,10 @@ proc encode*(encoder: var AbiEncoder, assetOutcome: AssetOutcome) =
   encoder.write(content.finish())
   encoder.finishTuple()
 
-proc encode*(encoder: var AbiEncoder, outcome: Outcome) =
+func encode*(encoder: var AbiEncoder, outcome: Outcome) =
   encoder.startTuple()
   encoder.write(seq[AssetOutcome](outcome))
   encoder.finishTuple()
 
-proc hashOutcome*(outcome: Outcome): array[32, byte] =
+func hashOutcome*(outcome: Outcome): array[32, byte] =
   keccak256.digest(AbiEncoder.encode(outcome)).data

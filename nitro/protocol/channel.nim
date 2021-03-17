@@ -12,7 +12,7 @@ type
     participants*: seq[EthAddress]
     chainId*: UInt256
 
-proc getChannelId*(channel: ChannelDefinition): Destination =
+func getChannelId*(channel: ChannelDefinition): Destination =
   var encoder= AbiEncoder.init()
   encoder.startTuple()
   encoder.write(channel.chainId)

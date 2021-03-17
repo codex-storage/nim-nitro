@@ -17,13 +17,13 @@ proc rng(data: var openArray[byte]): bool =
 proc random*(_: type PrivateKey): PrivateKey =
   PrivateKey.random(rng).get()
 
-proc `$`*(key: PrivateKey): string =
+func `$`*(key: PrivateKey): string =
   key.toHex()
 
-proc parse*(_: type PrivateKey, s: string): ?PrivateKey =
+func parse*(_: type PrivateKey, s: string): ?PrivateKey =
   SkSecretKey.fromHex(s).option
 
-proc toAddress*(key: PublicKey): EthAddress =
+func toAddress*(key: PublicKey): EthAddress =
   let hash = keccak256.digest(key.toRaw())
   var bytes: array[20, byte]
   for i in 0..<20:

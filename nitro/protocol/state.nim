@@ -29,7 +29,7 @@ type
     outcome*: seq[byte]
     appdata*: seq[byte]
 
-proc fixedPart*(state: State): FixedPart =
+func fixedPart*(state: State): FixedPart =
   FixedPart(
     chainId: state.channel.chainId,
     participants: state.channel.participants,
@@ -38,13 +38,13 @@ proc fixedPart*(state: State): FixedPart =
     challengeDuration: state.challengeDuration
   )
 
-proc variablePart*(state: State): VariablePart =
+func variablePart*(state: State): VariablePart =
   VariablePart(
     outcome: AbiEncoder.encode(state.outcome),
     appData: state.appData
   )
 
-proc hashAppPart*(state: State): array[32, byte] =
+func hashAppPart*(state: State): array[32, byte] =
   var encoder= AbiEncoder.init()
   encoder.startTuple()
   encoder.write(state.challengeDuration)
@@ -53,7 +53,7 @@ proc hashAppPart*(state: State): array[32, byte] =
   encoder.finishTuple()
   keccak256.digest(encoder.finish).data
 
-proc hashState*(state: State): array[32, byte] =
+func hashState*(state: State): array[32, byte] =
   var encoder= AbiEncoder.init()
   encoder.startTuple()
   encoder.write(state.turnNum)

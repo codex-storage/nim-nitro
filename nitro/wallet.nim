@@ -17,24 +17,24 @@ type
   Channel* = object
     latest*: ChannelUpdate
 
-proc init*(_: type Wallet, key: PrivateKey): Wallet =
+func init*(_: type Wallet, key: PrivateKey): Wallet =
   result.key = key
 
-proc address*(wallet: Wallet): EthAddress =
+func address*(wallet: Wallet): EthAddress =
   wallet.key.toPublicKey.toAddress
 
-proc sign(wallet: Wallet, update: ChannelUpdate): ChannelUpdate =
+func sign(wallet: Wallet, update: ChannelUpdate): ChannelUpdate =
   var signed = update
   signed.signatures &= @{wallet.address: wallet.key.sign(update.state)}
   signed
 
-proc createChannel(wallet: var Wallet, update: ChannelUpdate): Channel =
+func createChannel(wallet: var Wallet, update: ChannelUpdate): Channel =
   let signed = wallet.sign(update)
   let channel = Channel(latest: signed)
   wallet.channels.add(channel)
   channel
 
-proc openLedgerChannel*(wallet: var Wallet,
+func openLedgerChannel*(wallet: var Wallet,
                         hub: EthAddress,
                         chainId: UInt256,
                         nonce: UInt48,
@@ -43,7 +43,7 @@ proc openLedgerChannel*(wallet: var Wallet,
   let update = startLedger(wallet.address, hub, chainId, nonce, asset, amount)
   wallet.createChannel(update)
 
-proc acceptChannel*(wallet: var Wallet, update: ChannelUpdate): ?!Channel =
+func acceptChannel*(wallet: var Wallet, update: ChannelUpdate): ?!Channel =
   if not update.participants.contains(wallet.address):
     return Channel.failure "wallet owner is not a participant"
 

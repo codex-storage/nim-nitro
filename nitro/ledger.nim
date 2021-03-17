@@ -2,7 +2,7 @@ import ./basics
 import ./channelupdate
 import ./protocol
 
-proc startLedger*(me: EthAddress,
+func startLedger*(me: EthAddress,
                   hub: EthAddress,
                   chainId: UInt256,
                   nonce: UInt48,

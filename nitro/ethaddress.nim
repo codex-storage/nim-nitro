@@ -6,16 +6,16 @@ export questionable
 
 type EthAddress* = distinct array[20, byte]
 
-proc zero*(_: type EthAddress): EthAddress =
+func zero*(_: type EthAddress): EthAddress =
   EthAddress.default
 
-proc toArray*(address: EthAddress): array[20, byte] =
+func toArray*(address: EthAddress): array[20, byte] =
   array[20, byte](address)
 
-proc `$`*(a: EthAddress): string =
+func `$`*(a: EthAddress): string =
   a.toArray().toHex()
 
-proc parse*(_: type EthAddress, hex: string): ?EthAddress =
+func parse*(_: type EthAddress, hex: string): ?EthAddress =
   EthAddress(array[20, byte].fromHex(hex)).catch.option
 
-proc `==`*(a, b: EthAddress): bool {.borrow.}
+func `==`*(a, b: EthAddress): bool {.borrow.}

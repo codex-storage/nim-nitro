@@ -8,10 +8,10 @@ type
     state*: State
     signatures*: seq[(EthAddress, Signature)]
 
-proc participants*(update: ChannelUpdate): seq[EthAddress] =
+func participants*(update: ChannelUpdate): seq[EthAddress] =
   update.state.channel.participants
 
-proc verifySignatures*(update: ChannelUpdate): bool =
+func verifySignatures*(update: ChannelUpdate): bool =
   for (participant, signature) in update.signatures:
     if not update.participants.contains(participant):
       return false
