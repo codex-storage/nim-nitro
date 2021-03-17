@@ -1,5 +1,5 @@
 import ./basics
-import ./channelupdate
+import ./signedstate
 import ./protocol
 
 func startLedger*(me: EthAddress,
@@ -7,8 +7,8 @@ func startLedger*(me: EthAddress,
                   chainId: UInt256,
                   nonce: UInt48,
                   asset: EthAddress,
-                  amount: UInt256): ChannelUpdate =
-  ChannelUpdate(
+                  amount: UInt256): SignedState =
+  SignedState(
     state: State(
       channel: ChannelDefinition(
         chainId: chainId,

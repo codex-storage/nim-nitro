@@ -47,31 +47,31 @@ suite "wallet: accepting incoming channel":
 
   let key = PrivateKey.random()
   var wallet: Wallet
-  var update: ChannelUpdate
+  var signed: SignedState
 
   setup:
     wallet = Wallet.init(key)
-    update = ChannelUpdate(state: State.example)
-    update.state.channel.participants &= @[wallet.address]
+    signed = SignedState(state: State.example)
+    signed.state.channel.participants &= @[wallet.address]
 
   test "returns the new channel id":
-    let channel = wallet.acceptChannel(update).get
-    check wallet[channel].get.state == update.state
+    let channel = wallet.acceptChannel(signed).get
+    check wallet[channel].get.state == signed.state
 
   test "signs the channel state":
-    let channel = wallet.acceptChannel(update).get
-    let expectedSignatures = @{wallet.address: key.sign(update.state)}
+    let channel = wallet.acceptChannel(signed).get
+    let expectedSignatures = @{wallet.address: key.sign(signed.state)}
     check wallet[channel].get.signatures == expectedSignatures
 
   test "fails when wallet address is not a participant":
     let wrongParticipants = seq[EthAddress].example
-    update.state.channel.participants = wrongParticipants
-    check wallet.acceptChannel(update).isErr
+    signed.state.channel.participants = wrongParticipants
+    check wallet.acceptChannel(signed).isErr
 
   test "fails when signatures are incorrect":
     let otherKey = PrivateKey.random()
     let otherWallet = Wallet.init(otherKey)
     let wrongAddress = EthAddress.example
-    update.state.channel.participants &= @[otherWallet.address]
-    update.signatures = @{wrongAddress: otherKey.sign(update.state)}
-    check wallet.acceptChannel(update).isErr
+    signed.state.channel.participants &= @[otherWallet.address]
+    signed.signatures = @{wrongAddress: otherKey.sign(signed.state)}
+    check wallet.acceptChannel(signed).isErr

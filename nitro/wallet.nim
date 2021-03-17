@@ -2,19 +2,19 @@ import std/tables
 import ./basics
 import ./keys
 import ./protocol
-import ./channelupdate
+import ./signedstate
 import ./ledger
 
 include questionable/errorban
 
 export basics
 export keys
-export channelupdate
+export signedstate
 
 type
   Wallet* = object
     key: PrivateKey
-    channels: Table[ChannelId, ChannelUpdate]
+    channels: Table[ChannelId, SignedState]
   ChannelId* = Destination
 
 func init*(_: type Wallet, key: PrivateKey): Wallet =
@@ -23,16 +23,16 @@ func init*(_: type Wallet, key: PrivateKey): Wallet =
 func address*(wallet: Wallet): EthAddress =
   wallet.key.toPublicKey.toAddress
 
-func `[]`*(wallet: Wallet, channel: ChannelId): ?ChannelUpdate =
+func `[]`*(wallet: Wallet, channel: ChannelId): ?SignedState =
   wallet.channels[channel].catch.option
 
-func sign(wallet: Wallet, update: ChannelUpdate): ChannelUpdate =
-  var signed = update
-  signed.signatures &= @{wallet.address: wallet.key.sign(update.state)}
+func sign(wallet: Wallet, state: SignedState): SignedState =
+  var signed = state
+  signed.signatures &= @{wallet.address: wallet.key.sign(state.state)}
   signed
 
-func createChannel(wallet: var Wallet, update: ChannelUpdate): ChannelId =
-  let signed = wallet.sign(update)
+func createChannel(wallet: var Wallet, state: SignedState): ChannelId =
+  let signed = wallet.sign(state)
   let id = getChannelId(signed.state.channel)
   wallet.channels[id] = signed
   id
@@ -43,14 +43,14 @@ func openLedgerChannel*(wallet: var Wallet,
                         nonce: UInt48,
                         asset: EthAddress,
                         amount: UInt256): ChannelId =
-  let update = startLedger(wallet.address, hub, chainId, nonce, asset, amount)
-  wallet.createChannel(update)
+  let state = startLedger(wallet.address, hub, chainId, nonce, asset, amount)
+  wallet.createChannel(state)
 
-func acceptChannel*(wallet: var Wallet, update: ChannelUpdate): ?!ChannelId =
-  if not update.participants.contains(wallet.address):
+func acceptChannel*(wallet: var Wallet, state: SignedState): ?!ChannelId =
+  if not state.participants.contains(wallet.address):
     return ChannelId.failure "wallet owner is not a participant"
 
-  if not verifySignatures(update):
+  if not verifySignatures(state):
     return ChannelId.failure "incorrect signatures"
 
-  wallet.createChannel(update).success
+  wallet.createChannel(state).success
