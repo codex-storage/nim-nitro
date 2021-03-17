@@ -17,34 +17,31 @@ suite "wallet: opening ledger channel":
   let nonce = UInt48.example
 
   var wallet: Wallet
-  var channel: Channel
+  var channel: ChannelId
 
   setup:
     wallet = Wallet.init(key)
     channel = wallet.openLedgerChannel(hub, chainId, nonce, asset, amount)
 
   test "sets correct channel definition":
-    let definition = channel.latest.state.channel
+    let definition = wallet[channel].get.state.channel
     check definition.chainId == chainId
     check definition.nonce == nonce
     check definition.participants == @[wallet.address, hub]
 
   test "provides correct outcome":
-    let outcome = channel.latest.state.outcome
+    let outcome = wallet[channel].get.state.outcome
     let destination = wallet.address.toDestination
     check outcome == Outcome.init(asset, {destination: amount})
 
-  test "signs the upcoming state":
-    let state = channel.latest.state
-    let signatures = channel.latest.signatures
+  test "signs the state":
+    let state = wallet[channel].get.state
+    let signatures = wallet[channel].get.signatures
     check signatures == @{wallet.address: key.sign(state)}
 
   test "sets app definition and app data to zero":
-    check channel.latest.state.appDefinition == EthAddress.zero
-    check channel.latest.state.appData.len == 0
-
-  test "updates the list of channels":
-    check wallet.channels == @[channel]
+    check wallet[channel].get.state.appDefinition == EthAddress.zero
+    check wallet[channel].get.state.appData.len == 0
 
 suite "wallet: accepting incoming channel":
 
@@ -57,18 +54,14 @@ suite "wallet: accepting incoming channel":
     update = ChannelUpdate(state: State.example)
     update.state.channel.participants &= @[wallet.address]
 
-  test "returns the new channel instance":
+  test "returns the new channel id":
     let channel = wallet.acceptChannel(update).get
-    check channel.latest.state == update.state
-
-  test "updates the list of channels":
-    let channel = wallet.acceptChannel(update).get
-    check wallet.channels == @[channel]
+    check wallet[channel].get.state == update.state
 
   test "signs the channel state":
     let channel = wallet.acceptChannel(update).get
     let expectedSignatures = @{wallet.address: key.sign(update.state)}
-    check channel.latest.signatures == expectedSignatures
+    check wallet[channel].get.signatures == expectedSignatures
 
   test "fails when wallet address is not a participant":
     let wrongParticipants = seq[EthAddress].example

@@ -1,3 +1,4 @@
+import std/hashes
 import pkg/questionable
 import pkg/questionable/results
 import pkg/stew/byteutils
@@ -17,6 +18,7 @@ func parse*(_: type Destination, s: string): ?Destination =
    Destination(array[32, byte].fromHex(s)).catch.option
 
 func `==`*(a, b: Destination): bool {.borrow.}
+func hash*(destination: Destination): Hash {.borrow.}
 
 func toDestination*(address: EthAddress): Destination =
   var bytes: array[32, byte]
