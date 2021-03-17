@@ -1,9 +1,9 @@
 import pkg/questionable
 import pkg/questionable/results
 import pkg/stint
-import ./uint48
-import ./ethaddress
-import ./destination
+import ./basics/uint48
+import ./basics/ethaddress
+import ./basics/destination
 
 export questionable
 export results
