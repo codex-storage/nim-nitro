@@ -36,7 +36,7 @@ func init*(_: type Outcome,
   )
   Outcome(@[assetOutcome])
 
-func `==`*(a, b: Allocation): bool {.borrow.}
+proc `==`*(a, b: Allocation): bool {.borrow.}
 
 func `==`*(a, b: AssetOutcome): bool =
   if a.kind != b.kind:
@@ -49,7 +49,7 @@ func `==`*(a, b: AssetOutcome): bool =
     of guaranteeType:
       a.guarantee == b.guarantee
 
-func `==`*(a, b: Outcome): bool {.borrow.}
+proc `==`*(a, b: Outcome): bool {.borrow.}
 
 func encode*(encoder: var AbiEncoder, guarantee: Guarantee) =
   encoder.startTuple()

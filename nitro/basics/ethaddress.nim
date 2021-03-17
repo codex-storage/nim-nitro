@@ -18,4 +18,4 @@ func `$`*(a: EthAddress): string =
 func parse*(_: type EthAddress, hex: string): ?EthAddress =
   EthAddress(array[20, byte].fromHex(hex)).catch.option
 
-func `==`*(a, b: EthAddress): bool {.borrow.}
+proc `==`*(a, b: EthAddress): bool {.borrow.}
