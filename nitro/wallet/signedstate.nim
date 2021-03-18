@@ -6,7 +6,8 @@ include questionable/errorban
 type
   SignedState* = object
     state*: State
-    signatures*: seq[(EthAddress, Signature)]
+    signatures*: Signatures
+  Signatures* = seq[(EthAddress, Signature)]
 
 func hasParticipant*(signed: SignedState, participant: EthAddress): bool =
   signed.state.channel.participants.contains(participant)
