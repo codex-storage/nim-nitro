@@ -36,11 +36,12 @@ func sign(wallet: Wallet, state: SignedState): SignedState =
   signed.signatures &= wallet.key.sign(state.state)
   signed
 
-func createChannel(wallet: var Wallet, state: SignedState): ChannelId =
-  let signed = wallet.sign(state)
-  let id = getChannelId(signed.state.channel)
-  wallet.channels[id] = signed
-  id
+func createChannel(wallet: var Wallet, state: SignedState): ?!ChannelId =
+  let id = getChannelId(state.state.channel)
+  if wallet.channels.contains(id):
+    return ChannelId.failure("channel with id " & $id & " already exists")
+  wallet.channels[id] = wallet.sign(state)
+  ok id
 
 func updateChannel(wallet: var Wallet, state: SignedState) =
   let signed = wallet.sign(state)
@@ -52,7 +53,7 @@ func openLedgerChannel*(wallet: var Wallet,
                         chainId: UInt256,
                         nonce: UInt48,
                         asset: EthAddress,
-                        amount: UInt256): ChannelId =
+                        amount: UInt256): ?!ChannelId =
   let state = startLedger(wallet.address, hub, chainId, nonce, asset, amount)
   wallet.createChannel(state)
 
@@ -63,7 +64,7 @@ func acceptChannel*(wallet: var Wallet, signed: SignedState): ?!ChannelId =
   if not verifySignatures(signed):
     return ChannelId.failure "incorrect signatures"
 
-  wallet.createChannel(signed).success
+  wallet.createChannel(signed)
 
 func latestSignedState*(wallet: Wallet, channel: ChannelId): ?SignedState =
   wallet.channels?[channel]

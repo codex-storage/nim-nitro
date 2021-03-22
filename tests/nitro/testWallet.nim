@@ -21,7 +21,7 @@ suite "wallet: opening ledger channel":
 
   setup:
     wallet = Wallet.init(key)
-    channel = wallet.openLedgerChannel(hub, chainId, nonce, asset, amount)
+    channel = wallet.openLedgerChannel(hub, chainId, nonce, asset, amount).get
 
   test "sets correct channel definition":
     let definition = wallet.state(channel).get.channel
@@ -41,6 +41,9 @@ suite "wallet: opening ledger channel":
   test "sets app definition and app data to zero":
     check wallet.state(channel).get.appDefinition == EthAddress.zero
     check wallet.state(channel).get.appData.len == 0
+
+  test "does not allow opening a channel that already exists":
+    check wallet.openLedgerChannel(hub, chainId, nonce, asset, amount).isErr
 
 suite "wallet: accepting incoming channel":
 
@@ -71,6 +74,10 @@ suite "wallet: accepting incoming channel":
     signed.signatures = @[key.sign(State.example)]
     check wallet.acceptChannel(signed).isErr
 
+  test "fails when channel with this id already exists":
+    check wallet.acceptChannel(signed).isOk
+    check wallet.acceptChannel(signed).isErr
+
 suite "wallet: making payments":
 
   let key = PrivateKey.random()
@@ -85,7 +92,7 @@ suite "wallet: making payments":
   test "paying updates the channel state":
     wallet = Wallet.init(key)
     let me = wallet.address
-    channel = wallet.openLedgerChannel(hub, chainId, nonce, asset, 100.u256)
+    channel = wallet.openLedgerChannel(hub, chainId, nonce, asset, 100.u256).get
 
     check wallet.pay(channel, asset, hub, 1.u256).isOk
     check wallet.balance(channel, asset, me) == 99.u256
@@ -97,14 +104,14 @@ suite "wallet: making payments":
 
   test "paying updates signatures":
     wallet = Wallet.init(key)
-    channel = wallet.openLedgerChannel(hub, chainId, nonce, asset, 100.u256)
+    channel = wallet.openLedgerChannel(hub, chainId, nonce, asset, 100.u256).get
     check wallet.pay(channel, asset, hub, 1.u256).isOk
     let expectedSignature = key.sign(wallet.state(channel).get)
     check wallet.signature(channel, wallet.address) == expectedSignature.some
 
   test "pay returns the updated signed state":
     wallet = Wallet.init(key)
-    channel = wallet.openLedgerChannel(hub, chainId, nonce, asset, 42.u256)
+    channel = wallet.openLedgerChannel(hub, chainId, nonce, asset, 42.u256).get
     let updated = wallet.pay(channel, asset, hub, 1.u256).option
     check updated?.state == wallet.state(channel)
     check updated?.signatures == wallet.signatures(channel)
@@ -130,7 +137,7 @@ suite "wallet: making payments":
 
   test "payment fails when payer has insufficient funds":
     wallet = Wallet.init(key)
-    channel = wallet.openLedgerChannel(hub, chainId, nonce, asset, 1.u256)
+    channel = wallet.openLedgerChannel(hub, chainId, nonce, asset, 1.u256).get
     check wallet.pay(channel, asset, hub, 1.u256).isOk
     check wallet.pay(channel, asset, hub, 1.u256).isErr
 
@@ -148,7 +155,7 @@ suite "wallet: accepting payments":
     payer = Wallet.init(payerKey)
     receiver = Wallet.init(receiverKey)
     channel = payer.openLedgerChannel(
-      receiver.address, chainId, nonce, asset, 100.u256)
+      receiver.address, chainId, nonce, asset, 100.u256).get
     let update = payer.latestSignedState(channel).get
     discard receiver.acceptChannel(update)
 
@@ -184,12 +191,12 @@ suite "wallet: accepting payments":
 
   test "does not accept a payment for an unknown channel":
     let newChannel = payer.openLedgerChannel(
-      receiver.address, chainId, nonce + 1, asset, 100.u256)
+      receiver.address, chainId, nonce + 1, asset, 100.u256).get
     let payment = payer.pay(newChannel, asset, receiver.address, 10.u256).get
     check receiver.acceptPayment(newChannel, asset, payer.address, payment).isErr
 
   test "does not accept a payment for a different channel":
     let newChannel = payer.openLedgerChannel(
-      receiver.address, chainId, nonce + 1, asset, 100.u256)
+      receiver.address, chainId, nonce + 1, asset, 100.u256).get
     let payment = payer.pay(newChannel, asset, receiver.address, 10.u256).get
     check receiver.acceptPayment(channel, asset, payer.address, payment).isErr
