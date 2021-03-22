@@ -171,5 +171,13 @@ func acceptPayment*(wallet: var Wallet,
   if not payment.isSignedBy(sender):
     return void.failure "missing signature on payment"
 
+  if updatedBalances =? payment.state.outcome.balances(asset):
+    var expectedState: State = wallet.channels?[channel]?.state.get
+    expectedState.outcome.update(asset, updatedBalances)
+    if payment.state != expectedState:
+      return void.failure "payment has unexpected changes in state"
+  else:
+    return void.failure "payment misses balances for asset"
+
   wallet.channels[channel] = payment
   ok()
