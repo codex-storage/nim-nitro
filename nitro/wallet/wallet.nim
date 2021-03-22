@@ -108,7 +108,7 @@ func balance*(wallet: Wallet,
 func balance*(wallet: Wallet,
               channel: ChannelId,
               asset: EthAddress,
-              address: EthAddress): UInt256 =
+              address = wallet.address): UInt256 =
   wallet.balance(channel, asset, address.toDestination)
 
 func total(state: State, asset: EthAddress): UInt256 =
@@ -158,7 +158,7 @@ func acceptPayment*(wallet: var Wallet,
   if not (getChannelId(payment.state.channel) == channel):
     return void.failure "payment does not match channel"
 
-  let currentBalance = wallet.balance(channel, asset, wallet.address)
+  let currentBalance = wallet.balance(channel, asset)
   let futureBalance = payment.state.balance(asset, wallet.destination)
   if futureBalance <= currentBalance:
     return void.failure "payment should not decrease balance"

@@ -91,15 +91,14 @@ suite "wallet: making payments":
 
   test "paying updates the channel state":
     wallet = Wallet.init(key)
-    let me = wallet.address
     channel = wallet.openLedgerChannel(hub, chainId, nonce, asset, 100.u256).get
 
     check wallet.pay(channel, asset, hub, 1.u256).isOk
-    check wallet.balance(channel, asset, me) == 99.u256
+    check wallet.balance(channel, asset) == 99.u256
     check wallet.balance(channel, asset, hub) == 1.u256
 
     check wallet.pay(channel, asset, hub, 2.u256).isOk
-    check wallet.balance(channel, asset, me) == 97.u256
+    check wallet.balance(channel, asset) == 97.u256
     check wallet.balance(channel, asset, hub) == 3.u256
 
   test "paying updates signatures":
@@ -162,7 +161,7 @@ suite "wallet: accepting payments":
   test "updates channel state":
     let payment = payer.pay(channel, asset, receiver.address, 42.u256).get
     check receiver.acceptPayment(channel, asset, payer.address, payment).isOk
-    check receiver.balance(channel, asset, receiver.address) == 42.u256
+    check receiver.balance(channel, asset) == 42.u256
 
   test "fails when receiver balance is decreased":
     let payment1 = payer.pay(channel, asset, receiver.address, 10.u256).get
@@ -170,7 +169,7 @@ suite "wallet: accepting payments":
     check receiver.acceptPayment(channel, asset, payer.address, payment1).isOk
     check receiver.acceptPayment(channel, asset, payer.address, payment2).isOk
     check receiver.acceptPayment(channel, asset, payer.address, payment1).isErr
-    check receiver.balance(channel, asset, receiver.address) == 20
+    check receiver.balance(channel, asset) == 20
 
   test "fails when the total supply of the asset changes":
     var payment = payer.pay(channel, asset, receiver.address, 10.u256).get
