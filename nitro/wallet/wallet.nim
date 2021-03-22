@@ -108,24 +108,24 @@ func pay*(wallet: var Wallet,
           channel: ChannelId,
           asset: EthAddress,
           receiver: Destination,
-          amount: UInt256): ?!void =
+          amount: UInt256): ?!SignedState =
   if var state =? wallet.state(channel):
     if var balances =? state.outcome.balances(asset):
       ?balances.move(wallet.destination, receiver, amount)
       try:
         state.outcome.update(asset, balances)
         wallet.updateChannel(SignedState(state: state))
-        ok()
+        ok(wallet.channels[channel])
       except KeyError as error:
-        void.failure error
+        SignedState.failure error
     else:
-      void.failure "asset not found"
+      SignedState.failure "asset not found"
   else:
-    void.failure "channel not found"
+    SignedState.failure "channel not found"
 
 func pay*(wallet: var Wallet,
           channel: ChannelId,
           asset: EthAddress,
           receiver: EthAddress,
-          amount: UInt256): ?!void =
+          amount: UInt256): ?!SignedState =
   wallet.pay(channel, asset, receiver.toDestination, amount)
