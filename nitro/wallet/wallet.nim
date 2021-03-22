@@ -108,8 +108,11 @@ func balance*(wallet: Wallet,
 func balance*(wallet: Wallet,
               channel: ChannelId,
               asset: EthAddress,
-              address = wallet.address): UInt256 =
+              address: EthAddress): UInt256 =
   wallet.balance(channel, asset, address.toDestination)
+
+func balance*(wallet: Wallet, channel: ChannelId, asset: EthAddress): UInt256 =
+  wallet.balance(channel, asset, wallet.address)
 
 func total(state: State, asset: EthAddress): UInt256 =
   var total: UInt256
