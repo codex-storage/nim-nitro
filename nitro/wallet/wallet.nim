@@ -66,10 +66,7 @@ func acceptChannel*(wallet: var Wallet, signed: SignedState): ?!ChannelId =
   wallet.createChannel(signed).success
 
 func latestSignedState*(wallet: Wallet, channel: ChannelId): ?SignedState =
-  try:
-    wallet.channels[channel].some
-  except KeyError:
-    SignedState.none
+  wallet.channels?[channel]
 
 func state*(wallet: Wallet, channel: ChannelId): ?State =
   wallet.latestSignedState(channel)?.state
@@ -90,9 +87,9 @@ func balance(state: State,
              asset: EthAddress,
              destination: Destination): UInt256 =
   if balances =? state.outcome.balances(asset):
-    try:
-      balances[destination]
-    except KeyError:
+    if balance =? (balances?[destination]):
+      balance
+    else:
       0.u256
   else:
     0.u256
@@ -133,12 +130,9 @@ func pay*(wallet: var Wallet,
   if var state =? wallet.state(channel):
     if var balances =? state.outcome.balances(asset):
       ?balances.move(wallet.destination, receiver, amount)
-      try:
-        state.outcome.update(asset, balances)
-        wallet.updateChannel(SignedState(state: state))
-        ok(wallet.channels[channel])
-      except KeyError as error:
-        SignedState.failure error
+      state.outcome.update(asset, balances)
+      wallet.updateChannel(SignedState(state: state))
+      ok(wallet.channels?[channel].get)
     else:
       SignedState.failure "asset not found"
   else:
