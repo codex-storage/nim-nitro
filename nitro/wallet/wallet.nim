@@ -65,17 +65,17 @@ func acceptChannel*(wallet: var Wallet, signed: SignedState): ?!ChannelId =
 
   wallet.createChannel(signed).success
 
-func state*(wallet: Wallet, channel: ChannelId): ?State =
+func latestSignedState*(wallet: Wallet, channel: ChannelId): ?SignedState =
   try:
-    wallet.channels[channel].state.some
+    wallet.channels[channel].some
   except KeyError:
-    State.none
+    SignedState.none
+
+func state*(wallet: Wallet, channel: ChannelId): ?State =
+  wallet.latestSignedState(channel)?.state
 
 func signatures*(wallet: Wallet, channel: ChannelId): ?Signatures =
-  try:
-    wallet.channels[channel].signatures.some
-  except KeyError:
-    Signatures.none
+  wallet.latestSignedState(channel)?.signatures
 
 func signature*(wallet: Wallet,
                 channel: ChannelId,
@@ -86,23 +86,44 @@ func signature*(wallet: Wallet,
         return signature.some
   Signature.none
 
+func balance(state: State,
+             asset: EthAddress,
+             destination: Destination): UInt256 =
+  if balances =? state.outcome.balances(asset):
+    try:
+      balances[destination]
+    except KeyError:
+      0.u256
+  else:
+    0.u256
+
 func balance*(wallet: Wallet,
               channel: ChannelId,
               asset: EthAddress,
               destination: Destination): UInt256 =
   if state =? wallet.state(channel):
-    if balances =? state.outcome.balances(asset):
-      try:
-        return balances[destination]
-      except KeyError:
-        return 0.u256
-  0.u256
+    state.balance(asset, destination)
+  else:
+    0.u256
 
 func balance*(wallet: Wallet,
               channel: ChannelId,
               asset: EthAddress,
               address: EthAddress): UInt256 =
   wallet.balance(channel, asset, address.toDestination)
+
+func total(state: State, asset: EthAddress): UInt256 =
+  var total: UInt256
+  if balances =? state.outcome.balances(asset):
+    for amount in balances.values:
+      total += amount # TODO: overflow?
+  total
+
+func total(wallet: Wallet, channel: ChannelId, asset: EthAddress): UInt256 =
+  if state =? wallet.state(channel):
+    state.total(asset)
+  else:
+    0.u256
 
 func pay*(wallet: var Wallet,
           channel: ChannelId,
@@ -129,3 +150,30 @@ func pay*(wallet: var Wallet,
           receiver: EthAddress,
           amount: UInt256): ?!SignedState =
   wallet.pay(channel, asset, receiver.toDestination, amount)
+
+func acceptPayment*(wallet: var Wallet,
+                    channel: ChannelId,
+                    asset: EthAddress,
+                    sender: EthAddress,
+                    payment: SignedState): ?!void =
+  if not wallet.channels.contains(channel):
+    return void.failure "unknown channel"
+
+  if not (getChannelId(payment.state.channel) == channel):
+    return void.failure "payment does not match channel"
+
+  let currentBalance = wallet.balance(channel, asset, wallet.address)
+  let futureBalance = payment.state.balance(asset, wallet.destination)
+  if futureBalance <= currentBalance:
+    return void.failure "payment should not decrease balance"
+
+  let currentTotal = wallet.total(channel, asset)
+  let futureTotal = payment.state.total(asset)
+  if futureTotal != currentTotal:
+    return void.failure "total supply of asset should not change"
+
+  if not payment.isSignedBy(sender):
+    return void.failure "missing signature on payment"
+
+  wallet.channels[channel] = payment
+  ok()

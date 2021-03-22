@@ -78,3 +78,8 @@ proc example*(_: type State): State =
     appDefinition: EthAddress.example,
     appData: seq[byte].example
   )
+
+proc example*(_: type Signature): Signature =
+  let key = PrivateKey.random
+  let state = State.example
+  key.sign(state)

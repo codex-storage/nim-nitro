@@ -137,3 +137,63 @@ suite "wallet: making payments":
     channel = wallet.openLedgerChannel(hub, chainId, nonce, asset, 1.u256)
     check wallet.pay(channel, asset, hub, 1.u256).isOk
     check wallet.pay(channel, asset, hub, 1.u256).isErr
+
+suite "wallet: accepting payments":
+
+  let payerKey, receiverKey = PrivateKey.random()
+  let asset = EthAddress.example
+  let chainId = UInt256.example
+  let nonce = UInt48.example
+
+  var payer, receiver: Wallet
+  var channel: ChannelId
+
+  setup:
+    payer = Wallet.init(payerKey)
+    receiver = Wallet.init(receiverKey)
+    channel = payer.openLedgerChannel(
+      receiver.address, chainId, nonce, asset, 100.u256)
+    let update = payer.latestSignedState(channel).get
+    discard receiver.acceptChannel(update)
+
+  test "updates channel state":
+    let payment = payer.pay(channel, asset, receiver.address, 42.u256).get
+    check receiver.acceptPayment(channel, asset, payer.address, payment).isOk
+    check receiver.balance(channel, asset, receiver.address) == 42.u256
+
+  test "does not accept a decrease in receiver balance":
+    let payment1 = payer.pay(channel, asset, receiver.address, 10.u256).get
+    let payment2 = payer.pay(channel, asset, receiver.address, 10.u256).get
+    check receiver.acceptPayment(channel, asset, payer.address, payment1).isOk
+    check receiver.acceptPayment(channel, asset, payer.address, payment2).isOk
+    check receiver.acceptPayment(channel, asset, payer.address, payment1).isErr
+    check receiver.balance(channel, asset, receiver.address) == 20
+
+  test "does not accept a payment where the total supply of the asset changes":
+    var payment = payer.pay(channel, asset, receiver.address, 10.u256).get
+    var balances = payment.state.outcome.balances(asset).get
+    balances[payer.destination] += 10.u256
+    payment.state.outcome.update(asset, balances)
+    check receiver.acceptPayment(channel, asset, payer.address, payment).isErr
+
+  test "does not accept a payment without a signature":
+    var payment = payer.pay(channel, asset, receiver.address, 10.u256).get
+    payment.signatures = @[]
+    check receiver.acceptPayment(channel, asset, payer.address, payment).isErr
+
+  test "does not accept a payment with an incorrect signature":
+    var payment = payer.pay(channel, asset, receiver.address, 10.u256).get
+    payment.signatures = @{payer.address: Signature.example}
+    check receiver.acceptPayment(channel, asset, payer.address, payment).isErr
+
+  test "does not accept a payment for an unknown channel":
+    let newChannel = payer.openLedgerChannel(
+      receiver.address, chainId, nonce + 1, asset, 100.u256)
+    let payment = payer.pay(newChannel, asset, receiver.address, 10.u256).get
+    check receiver.acceptPayment(newChannel, asset, payer.address, payment).isErr
+
+  test "does not accept a payment for a different channel":
+    let newChannel = payer.openLedgerChannel(
+      receiver.address, chainId, nonce + 1, asset, 100.u256)
+    let payment = payer.pay(newChannel, asset, receiver.address, 10.u256).get
+    check receiver.acceptPayment(channel, asset, payer.address, payment).isErr

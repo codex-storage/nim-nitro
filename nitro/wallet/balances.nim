@@ -5,6 +5,8 @@ import ../protocol
 
 include questionable/errorban
 
+export tables
+
 type
   Balances* = OrderedTable[Destination, UInt256]
 
