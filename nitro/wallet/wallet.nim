@@ -33,7 +33,7 @@ func destination*(wallet: Wallet): Destination =
 
 func sign(wallet: Wallet, state: SignedState): SignedState =
   var signed = state
-  signed.signatures &= @{wallet.address: wallet.key.sign(state.state)}
+  signed.signatures &= wallet.key.sign(state.state)
   signed
 
 func createChannel(wallet: var Wallet, state: SignedState): ChannelId =
@@ -71,16 +71,17 @@ func latestSignedState*(wallet: Wallet, channel: ChannelId): ?SignedState =
 func state*(wallet: Wallet, channel: ChannelId): ?State =
   wallet.latestSignedState(channel)?.state
 
-func signatures*(wallet: Wallet, channel: ChannelId): ?Signatures =
+func signatures*(wallet: Wallet, channel: ChannelId): ?seq[Signature] =
   wallet.latestSignedState(channel)?.signatures
 
 func signature*(wallet: Wallet,
                 channel: ChannelId,
                 address: EthAddress): ?Signature =
-  if signatures =? wallet.signatures(channel):
-    for (signer, signature) in signatures:
-      if signer == address:
-        return signature.some
+  if signed =? wallet.latestSignedState(channel):
+    for signature in signed.signatures:
+      if signer =? signature.recover(signed.state):
+        if signer == address:
+          return signature.some
   Signature.none
 
 func balance(state: State,

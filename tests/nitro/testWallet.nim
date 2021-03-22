@@ -36,7 +36,7 @@ suite "wallet: opening ledger channel":
   test "signs the state":
     let state = wallet.state(channel).get
     let signatures = wallet.signatures(channel).get
-    check signatures == @{wallet.address: key.sign(state)}
+    check signatures == @[key.sign(state)]
 
   test "sets app definition and app data to zero":
     check wallet.state(channel).get.appDefinition == EthAddress.zero
@@ -59,7 +59,7 @@ suite "wallet: accepting incoming channel":
 
   test "signs the channel state":
     let channel = wallet.acceptChannel(signed).get
-    let expectedSignatures = @{wallet.address: key.sign(signed.state)}
+    let expectedSignatures = @[key.sign(signed.state)]
     check wallet.signatures(channel).get == expectedSignatures
 
   test "fails when wallet address is not a participant":
@@ -68,11 +68,7 @@ suite "wallet: accepting incoming channel":
     check wallet.acceptChannel(signed).isErr
 
   test "fails when signatures are incorrect":
-    let otherKey = PrivateKey.random()
-    let otherWallet = Wallet.init(otherKey)
-    let wrongAddress = EthAddress.example
-    signed.state.channel.participants &= @[otherWallet.address]
-    signed.signatures = @{wrongAddress: otherKey.sign(signed.state)}
+    signed.signatures = @[key.sign(State.example)]
     check wallet.acceptChannel(signed).isErr
 
 suite "wallet: making payments":
@@ -183,7 +179,7 @@ suite "wallet: accepting payments":
 
   test "does not accept a payment with an incorrect signature":
     var payment = payer.pay(channel, asset, receiver.address, 10.u256).get
-    payment.signatures = @{payer.address: Signature.example}
+    payment.signatures = @[Signature.example]
     check receiver.acceptPayment(channel, asset, payer.address, payment).isErr
 
   test "does not accept a payment for an unknown channel":
