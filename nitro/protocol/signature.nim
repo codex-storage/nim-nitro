@@ -5,10 +5,11 @@ import ../basics
 import ../keys
 import ./state
 
-include questionable/errorban
+push: {.upraises:[].}
 
 export basics
 export keys
+export secp256k1
 
 type Signature* = SkRecoverableSignature
 

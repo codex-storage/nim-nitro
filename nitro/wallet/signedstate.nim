@@ -1,7 +1,7 @@
 import ../basics
 import ../protocol
 
-include questionable/errorban
+push: {.upraises:[].}
 
 type
   SignedState* = object

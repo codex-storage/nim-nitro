@@ -2,7 +2,7 @@ import pkg/nimcrypto
 import ../basics
 import ./abi
 
-include questionable/errorban
+push: {.upraises:[].}
 
 export basics
 

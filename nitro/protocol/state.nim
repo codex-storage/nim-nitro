@@ -4,7 +4,7 @@ import ./channel
 import ./outcome
 import ./abi
 
-include questionable/errorban
+push: {.upraises:[].}
 
 export basics
 export channel

@@ -1,7 +1,7 @@
 import pkg/stew/endians2
 import ../basics
 
-include questionable/errorban
+push: {.upraises:[].}
 
 export basics
 

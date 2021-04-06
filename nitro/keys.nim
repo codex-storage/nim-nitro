@@ -5,7 +5,7 @@ import ./basics
 export basics
 export toPublicKey
 
-include questionable/errorban
+push: {.upraises:[].}
 
 type
   PrivateKey* = SkSecretKey

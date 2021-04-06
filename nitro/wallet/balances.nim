@@ -3,7 +3,7 @@ import std/sequtils
 import ../basics
 import ../protocol
 
-include questionable/errorban
+push: {.upraises:[].}
 
 export tables
 

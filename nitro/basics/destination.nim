@@ -1,10 +1,11 @@
 import std/hashes
 import pkg/questionable
 import pkg/questionable/results
+import pkg/upraises
 import pkg/stew/byteutils
 import ./ethaddress
 
-include questionable/errorban
+push: {.upraises:[].}
 
 type Destination* = distinct array[32, byte]
 
