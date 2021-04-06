@@ -9,7 +9,6 @@ push: {.upraises:[].}
 
 export basics
 export keys
-export secp256k1
 
 type Signature* = SkRecoverableSignature
 

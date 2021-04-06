@@ -1,5 +1,6 @@
 import std/json
 import std/typetraits
+import pkg/secp256k1
 import pkg/stew/byteutils
 import ./basics
 import ./protocol
