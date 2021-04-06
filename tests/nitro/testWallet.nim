@@ -5,7 +5,9 @@ suite "wallet":
   test "wallet is created from private key":
     let key = PrivateKey.random()
     let wallet = Wallet.init(key)
+    check wallet.publicKey == key.toPublicKey
     check wallet.address == key.toPublicKey.toAddress
+    check wallet.destination == key.toPublicKey.toAddress.toDestination
 
 suite "wallet: opening ledger channel":
 

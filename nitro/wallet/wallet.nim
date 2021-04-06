@@ -25,8 +25,11 @@ type
 func init*(_: type Wallet, key: PrivateKey): Wallet =
   result.key = key
 
+func publicKey*(wallet: Wallet): PublicKey =
+  wallet.key.toPublicKey
+
 func address*(wallet: Wallet): EthAddress =
-  wallet.key.toPublicKey.toAddress
+  wallet.publicKey.toAddress
 
 func destination*(wallet: Wallet): Destination =
   wallet.address.toDestination
