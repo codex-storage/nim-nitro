@@ -83,3 +83,9 @@ proc example*(_: type Signature): Signature =
   let key = PrivateKey.random
   let state = State.example
   key.sign(state)
+
+proc example*(_: type SignedState): SignedState =
+  let state = State.example
+  let key = PrivateKey.random
+  let signature = key.sign(state)
+  SignedState(state: state, signatures: @[signature])
