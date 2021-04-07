@@ -7,7 +7,7 @@ suite "signature":
 
   test "signs state hashes":
     let state = State.example
-    let privateKey = PrivateKey.random()
+    let privateKey = EthPrivateKey.random()
     let publicKey = privateKey.toPublicKey()
 
     let signature = privateKey.sign(state)
@@ -19,7 +19,7 @@ suite "signature":
 
   test "recovers ethereum address from signature":
     let state = State.example
-    let key = PrivateKey.random()
+    let key = EthPrivateKey.random()
     let address = key.toPublicKey.toAddress
     let signature = key.sign(state)
     check recover(signature, state) == address.some
@@ -27,7 +27,7 @@ suite "signature":
 
   test "verifies signatures":
     let state = State.example
-    let key = PrivateKey.random()
+    let key = EthPrivateKey.random()
     let address = key.toPublicKey.toAddress
     let signature = key.sign(state)
     check verify(signature, state, address)
@@ -50,7 +50,7 @@ suite "signature":
       appDefinition: EthAddress.default,
       challengeDuration: 5
     )
-    let seckey = PrivateKey.parse(
+    let seckey = EthPrivateKey.parse(
       "41b0f5f91967dded8af487277874f95116094cc6004ac2b2169b5b6a87608f3e"
     ).get()
     let expected = Signature.parse(

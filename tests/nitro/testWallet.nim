@@ -3,7 +3,7 @@ import ./basics
 suite "wallet":
 
   test "wallet is created from private key":
-    let key = PrivateKey.random()
+    let key = EthPrivateKey.random()
     let wallet = Wallet.init(key)
     check wallet.publicKey == key.toPublicKey
     check wallet.address == key.toPublicKey.toAddress
@@ -11,7 +11,7 @@ suite "wallet":
 
 suite "wallet: opening ledger channel":
 
-  let key = PrivateKey.random()
+  let key = EthPrivateKey.random()
   let asset = EthAddress.example
   let amount = 42.u256
   let hub = EthAddress.example
@@ -49,7 +49,7 @@ suite "wallet: opening ledger channel":
 
 suite "wallet: accepting incoming channel":
 
-  let key = PrivateKey.random()
+  let key = EthPrivateKey.random()
   var wallet: Wallet
   var signed: SignedState
 
@@ -82,7 +82,7 @@ suite "wallet: accepting incoming channel":
 
 suite "wallet: making payments":
 
-  let key = PrivateKey.random()
+  let key = EthPrivateKey.random()
   let asset = EthAddress.example
   let hub = EthAddress.example
   let chainId = UInt256.example
@@ -144,7 +144,7 @@ suite "wallet: making payments":
 
 suite "wallet: accepting payments":
 
-  let payerKey, receiverKey = PrivateKey.random()
+  let payerKey, receiverKey = EthPrivateKey.random()
   let asset = EthAddress.example
   let chainId = UInt256.example
   let nonce = UInt48.example

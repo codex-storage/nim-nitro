@@ -15,17 +15,17 @@ export balances
 
 type
   Wallet* = object
-    key: PrivateKey
+    key: EthPrivateKey
     channels: Table[ChannelId, SignedState]
   ChannelId* = Destination
   Payment* = tuple
     destination: Destination
     amount: UInt256
 
-func init*(_: type Wallet, key: PrivateKey): Wallet =
+func init*(_: type Wallet, key: EthPrivateKey): Wallet =
   result.key = key
 
-func publicKey*(wallet: Wallet): PublicKey =
+func publicKey*(wallet: Wallet): EthPublicKey =
   wallet.key.toPublicKey
 
 func address*(wallet: Wallet): EthAddress =

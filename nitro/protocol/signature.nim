@@ -20,14 +20,14 @@ func hashMessage(message: openArray[byte]): array[32, byte] =
   data.add(message)
   keccak256.digest(data).data
 
-func sign(key: PrivateKey, hash: array[32, byte]): Signature =
+func sign(key: EthPrivateKey, hash: array[32, byte]): Signature =
   key.signRecoverable(SkMessage(hash))
 
-func sign*(key: PrivateKey, state: State): Signature =
+func sign*(key: EthPrivateKey, state: State): Signature =
   let hash = hashMessage(hashState(state))
   key.sign(hash)
 
-func recover(signature: Signature, hash: array[32, byte]): ?PublicKey =
+func recover(signature: Signature, hash: array[32, byte]): ?EthPublicKey =
   recover(signature, SkMessage(hash)).option
 
 func recover*(signature: Signature, state: State): ?EthAddress =
