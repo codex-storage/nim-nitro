@@ -54,17 +54,15 @@ func initFromJson*(bytes: var seq[byte], node: JsonNode, _: var string) =
 
 func initFromJson*(address: var EthAddress, node: JsonNode, _: var string) =
   node.expectKind(JString)
-  let parsed = EthAddress.parse(node.getStr)
-  if parsed.isSome:
-    address = parsed.get
+  if parsed =? EthAddress.parse(node.getStr):
+    address = parsed
   else:
     raise newException(ValueError, "invalid ethereum address")
 
 func initFromJson*(dest: var Destination, node: JsonNode, _: var string) =
   node.expectKind(JString)
-  let parsed = Destination.parse(node.getStr)
-  if parsed.isSome:
-    dest = parsed.get
+  if parsed =? Destination.parse(node.getStr):
+    dest = parsed
   else:
     raise newException(ValueError, "invalid nitro destination")
 
@@ -74,9 +72,8 @@ func initFromJson*(number: var UInt256, node: JsonNode, _: var string) =
 
 func initFromJson*(signature: var Signature, node: JsonNode, _: var string) =
   node.expectKind(JString)
-  let parsed = Signature.parse(node.getStr)
-  if parsed.isSome:
-    signature = parsed.get
+  if parsed =? Signature.parse(node.getStr):
+    signature = parsed
   else:
     raise newException(ValueError, "invalid signature")
 
