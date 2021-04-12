@@ -32,7 +32,7 @@ func recover(signature: Signature, hash: array[32, byte]): ?EthPublicKey =
 
 func recover*(signature: Signature, state: State): ?EthAddress =
   let hash = hashMessage(hashState(state))
-  recover(signature, hash)?.toAddress
+  recover(signature, hash).?toAddress
 
 func verify*(signature: Signature, state: State, signer: EthAddress): bool =
   recover(signature, state) == signer.some

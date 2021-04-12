@@ -70,13 +70,13 @@ func acceptChannel*(wallet: var Wallet, signed: SignedState): ?!ChannelId =
   wallet.createChannel(signed)
 
 func latestSignedState*(wallet: Wallet, channel: ChannelId): ?SignedState =
-  wallet.channels?[channel]
+  wallet.channels.?[channel]
 
 func state*(wallet: Wallet, channel: ChannelId): ?State =
-  wallet.latestSignedState(channel)?.state
+  wallet.latestSignedState(channel).?state
 
 func signatures*(wallet: Wallet, channel: ChannelId): ?seq[Signature] =
-  wallet.latestSignedState(channel)?.signatures
+  wallet.latestSignedState(channel).?signatures
 
 func signature*(wallet: Wallet,
                 channel: ChannelId,
@@ -92,7 +92,7 @@ func balance(state: State,
              asset: EthAddress,
              destination: Destination): UInt256 =
   if balances =? state.outcome.balances(asset):
-    if balance =? (balances?[destination]):
+    if balance =? balances.?[destination]:
       balance
     else:
       0.u256
@@ -140,7 +140,7 @@ func pay*(wallet: var Wallet,
       ?balances.move(wallet.destination, receiver, amount)
       state.outcome.update(asset, balances)
       wallet.updateChannel(SignedState(state: state))
-      ok(wallet.channels?[channel].get)
+      ok(wallet.channels.?[channel].get)
     else:
       SignedState.failure "asset not found"
   else:
@@ -178,7 +178,7 @@ func acceptPayment*(wallet: var Wallet,
     return void.failure "missing signature on payment"
 
   if updatedBalances =? payment.state.outcome.balances(asset):
-    var expectedState: State = wallet.channels?[channel]?.state.get
+    var expectedState: State = wallet.channels.?[channel].?state.get
     expectedState.outcome.update(asset, updatedBalances)
     if payment.state != expectedState:
       return void.failure "payment has unexpected changes in state"

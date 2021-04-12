@@ -1,11 +1,11 @@
-version = "0.1.0"
+version = "0.2.0"
 author = "Nim Nitro developers"
 license = "MIT"
 description = "Nitro state channels"
 
 requires "nim >= 1.2.6 & < 2.0.0"
 requires "nimcrypto >= 0.5.4 & < 0.6.0"
-requires "questionable >= 0.4.3 & < 0.5.0"
+requires "questionable >= 0.5.0 & < 0.6.0"
 requires "upraises >= 0.1.0 & < 0.2.0"
 requires "secp256k1"
 requires "stint"

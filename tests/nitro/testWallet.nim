@@ -114,8 +114,8 @@ suite "wallet: making payments":
     wallet = Wallet.init(key)
     channel = wallet.openLedgerChannel(hub, chainId, nonce, asset, 42.u256).get
     let updated = wallet.pay(channel, asset, hub, 1.u256).option
-    check updated?.state == wallet.state(channel)
-    check updated?.signatures == wallet.signatures(channel)
+    check updated.?state == wallet.state(channel)
+    check updated.?signatures == wallet.signatures(channel)
 
   test "payment fails when channel not found":
     wallet = Wallet.init(key)
