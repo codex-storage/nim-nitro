@@ -5,6 +5,7 @@ import ../protocol
 import ./signedstate
 import ./ledger
 import ./balances
+import ./nonces
 
 push: {.upraises:[].}
 
@@ -17,6 +18,7 @@ type
   Wallet* = object
     key: EthPrivateKey
     channels: Table[ChannelId, SignedState]
+    nonces: Nonces
   ChannelId* = Destination
   Payment* = tuple
     destination: Destination
@@ -39,11 +41,16 @@ func sign(wallet: Wallet, state: SignedState): SignedState =
   signed.signatures &= wallet.key.sign(state.state)
   signed
 
+func incNonce(wallet: var Wallet, state: SignedState) =
+  let channel = state.state.channel
+  wallet.nonces.incNonce(channel.nonce, channel.chainId, channel.participants)
+
 func createChannel(wallet: var Wallet, state: SignedState): ?!ChannelId =
   let id = getChannelId(state.state.channel)
   if wallet.channels.contains(id):
     return ChannelId.failure("channel with id " & $id & " already exists")
   wallet.channels[id] = wallet.sign(state)
+  wallet.incNonce(state)
   ok id
 
 func updateChannel(wallet: var Wallet, state: SignedState) =
@@ -59,6 +66,14 @@ func openLedgerChannel*(wallet: var Wallet,
                         amount: UInt256): ?!ChannelId =
   let state = startLedger(wallet.address, hub, chainId, nonce, asset, amount)
   wallet.createChannel(state)
+
+func openLedgerChannel*(wallet: var Wallet,
+                        hub: EthAddress,
+                        chainId: UInt256,
+                        asset: EthAddress,
+                        amount: UInt256): ?!ChannelId =
+  let nonce = wallet.nonces.getNonce(chainId, wallet.address, hub)
+  openLedgerChannel(wallet, hub, chainId, nonce, asset, amount)
 
 func acceptChannel*(wallet: var Wallet, signed: SignedState): ?!ChannelId =
   if not signed.hasParticipant(wallet.address):

@@ -31,6 +31,12 @@ suite "wallet: opening ledger channel":
     check definition.nonce == nonce
     check definition.participants == @[wallet.address, hub]
 
+  test "uses consecutive nonces when none is provided":
+    channel = wallet.openLedgerChannel(hub, chainId, asset, amount).get
+    check wallet.state(channel).get.channel.nonce == nonce + 1
+    channel = wallet.openLedgerChannel(hub, chainId, asset, amount).get
+    check wallet.state(channel).get.channel.nonce == nonce + 2
+
   test "provides correct outcome":
     let outcome = wallet.state(channel).get.outcome
     check outcome == Outcome.init(asset, {wallet.destination: amount})
