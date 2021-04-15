@@ -31,7 +31,7 @@ func move*(balances: var Balances,
            amount: UInt256): ?!void =
   try:
     if balances[source] < amount:
-      return void.failure "insufficient funds"
+      return failure "insufficient funds"
 
     balances[source] -= amount
     if (balances.contains(destination)):
@@ -39,6 +39,6 @@ func move*(balances: var Balances,
     else:
       balances[destination] = amount
 
-    ok()
+    success()
   except KeyError:
-    void.failure "no funds"
+    failure "no funds"

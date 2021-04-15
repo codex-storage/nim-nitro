@@ -48,10 +48,10 @@ func incNonce(wallet: var Wallet, state: SignedState) =
 func createChannel(wallet: var Wallet, state: SignedState): ?!ChannelId =
   let id = getChannelId(state.state.channel)
   if wallet.channels.contains(id):
-    return ChannelId.failure("channel with id " & $id & " already exists")
+    return failure "channel with id " & $id & " already exists"
   wallet.channels[id] = wallet.sign(state)
   wallet.incNonce(state)
-  ok id
+  success id
 
 func updateChannel(wallet: var Wallet, state: SignedState) =
   let signed = wallet.sign(state)
@@ -77,10 +77,10 @@ func openLedgerChannel*(wallet: var Wallet,
 
 func acceptChannel*(wallet: var Wallet, signed: SignedState): ?!ChannelId =
   if not signed.hasParticipant(wallet.address):
-    return ChannelId.failure "wallet owner is not a participant"
+    return failure "wallet owner is not a participant"
 
   if not verifySignatures(signed):
-    return ChannelId.failure "incorrect signatures"
+    return failure "incorrect signatures"
 
   wallet.createChannel(signed)
 
@@ -155,11 +155,11 @@ func pay*(wallet: var Wallet,
       ?balances.move(wallet.destination, receiver, amount)
       state.outcome.update(asset, balances)
       wallet.updateChannel(SignedState(state: state))
-      ok(wallet.channels.?[channel].get)
+      success wallet.channels.?[channel].get
     else:
-      SignedState.failure "asset not found"
+      failure "asset not found"
   else:
-    SignedState.failure "channel not found"
+    failure "channel not found"
 
 func pay*(wallet: var Wallet,
           channel: ChannelId,
@@ -174,31 +174,31 @@ func acceptPayment*(wallet: var Wallet,
                     sender: EthAddress,
                     payment: SignedState): ?!void =
   if not wallet.channels.contains(channel):
-    return void.failure "unknown channel"
+    return failure "unknown channel"
 
   if not (getChannelId(payment.state.channel) == channel):
-    return void.failure "payment does not match channel"
+    return failure "payment does not match channel"
 
   let currentBalance = wallet.balance(channel, asset)
   let futureBalance = payment.state.balance(asset, wallet.destination)
   if futureBalance <= currentBalance:
-    return void.failure "payment should not decrease balance"
+    return failure "payment should not decrease balance"
 
   let currentTotal = wallet.total(channel, asset)
   let futureTotal = payment.state.total(asset)
   if futureTotal != currentTotal:
-    return void.failure "total supply of asset should not change"
+    return failure "total supply of asset should not change"
 
   if not payment.isSignedBy(sender):
-    return void.failure "missing signature on payment"
+    return failure "missing signature on payment"
 
   if updatedBalances =? payment.state.outcome.balances(asset):
     var expectedState: State = wallet.channels.?[channel].?state.get
     expectedState.outcome.update(asset, updatedBalances)
     if payment.state != expectedState:
-      return void.failure "payment has unexpected changes in state"
+      return failure "payment has unexpected changes in state"
   else:
-    return void.failure "payment misses balances for asset"
+    return failure "payment misses balances for asset"
 
   wallet.channels[channel] = payment
-  ok()
+  success()

@@ -51,7 +51,7 @@ suite "wallet: opening ledger channel":
     check wallet.state(channel).get.appData.len == 0
 
   test "does not allow opening a channel that already exists":
-    check wallet.openLedgerChannel(hub, chainId, nonce, asset, amount).isErr
+    check wallet.openLedgerChannel(hub, chainId, nonce, asset, amount).isFailure
 
 suite "wallet: accepting incoming channel":
 
@@ -76,15 +76,15 @@ suite "wallet: accepting incoming channel":
   test "fails when wallet address is not a participant":
     let wrongParticipants = seq[EthAddress].example
     signed.state.channel.participants = wrongParticipants
-    check wallet.acceptChannel(signed).isErr
+    check wallet.acceptChannel(signed).isFailure
 
   test "fails when signatures are incorrect":
     signed.signatures = @[key.sign(State.example)]
-    check wallet.acceptChannel(signed).isErr
+    check wallet.acceptChannel(signed).isFailure
 
   test "fails when channel with this id already exists":
-    check wallet.acceptChannel(signed).isOk
-    check wallet.acceptChannel(signed).isErr
+    check wallet.acceptChannel(signed).isSuccess
+    check wallet.acceptChannel(signed).isFailure
 
 suite "wallet: making payments":
 
@@ -101,18 +101,18 @@ suite "wallet: making payments":
     wallet = Wallet.init(key)
     channel = wallet.openLedgerChannel(hub, chainId, nonce, asset, 100.u256).get
 
-    check wallet.pay(channel, asset, hub, 1.u256).isOk
+    check wallet.pay(channel, asset, hub, 1.u256).isSuccess
     check wallet.balance(channel, asset) == 99.u256
     check wallet.balance(channel, asset, hub) == 1.u256
 
-    check wallet.pay(channel, asset, hub, 2.u256).isOk
+    check wallet.pay(channel, asset, hub, 2.u256).isSuccess
     check wallet.balance(channel, asset) == 97.u256
     check wallet.balance(channel, asset, hub) == 3.u256
 
   test "paying updates signatures":
     wallet = Wallet.init(key)
     channel = wallet.openLedgerChannel(hub, chainId, nonce, asset, 100.u256).get
-    check wallet.pay(channel, asset, hub, 1.u256).isOk
+    check wallet.pay(channel, asset, hub, 1.u256).isSuccess
     let expectedSignature = key.sign(wallet.state(channel).get)
     check wallet.signature(channel, wallet.address) == expectedSignature.some
 
@@ -125,14 +125,14 @@ suite "wallet: making payments":
 
   test "payment fails when channel not found":
     wallet = Wallet.init(key)
-    check wallet.pay(channel, asset, hub, 1.u256).isErr
+    check wallet.pay(channel, asset, hub, 1.u256).isFailure
 
   test "payment fails when asset not found":
     wallet = Wallet.init(key)
     var state = State.example
     state.channel.participants &= wallet.address
     channel = wallet.acceptChannel(SignedState(state: state)).get
-    check wallet.pay(channel, asset, hub, 1.u256).isErr
+    check wallet.pay(channel, asset, hub, 1.u256).isFailure
 
   test "payment fails when payer has no allocation":
     wallet = Wallet.init(key)
@@ -140,13 +140,13 @@ suite "wallet: making payments":
     state.channel = ChannelDefinition(participants: @[wallet.address])
     state.outcome = Outcome.init(asset, @[])
     channel = wallet.acceptChannel(SignedState(state: state)).get
-    check wallet.pay(channel, asset, hub, 1.u256).isErr
+    check wallet.pay(channel, asset, hub, 1.u256).isFailure
 
   test "payment fails when payer has insufficient funds":
     wallet = Wallet.init(key)
     channel = wallet.openLedgerChannel(hub, chainId, nonce, asset, 1.u256).get
-    check wallet.pay(channel, asset, hub, 1.u256).isOk
-    check wallet.pay(channel, asset, hub, 1.u256).isErr
+    check wallet.pay(channel, asset, hub, 1.u256).isSuccess
+    check wallet.pay(channel, asset, hub, 1.u256).isFailure
 
 suite "wallet: accepting payments":
 
@@ -168,15 +168,15 @@ suite "wallet: accepting payments":
 
   test "updates channel state":
     let payment = payer.pay(channel, asset, receiver.address, 42.u256).get
-    check receiver.acceptPayment(channel, asset, payer.address, payment).isOk
+    check receiver.acceptPayment(channel, asset, payer.address, payment).isSuccess
     check receiver.balance(channel, asset) == 42.u256
 
   test "fails when receiver balance is decreased":
     let payment1 = payer.pay(channel, asset, receiver.address, 10.u256).get
     let payment2 = payer.pay(channel, asset, receiver.address, 10.u256).get
-    check receiver.acceptPayment(channel, asset, payer.address, payment1).isOk
-    check receiver.acceptPayment(channel, asset, payer.address, payment2).isOk
-    check receiver.acceptPayment(channel, asset, payer.address, payment1).isErr
+    check receiver.acceptPayment(channel, asset, payer.address, payment1).isSuccess
+    check receiver.acceptPayment(channel, asset, payer.address, payment2).isSuccess
+    check receiver.acceptPayment(channel, asset, payer.address, payment1).isFailure
     check receiver.balance(channel, asset) == 20
 
   test "fails when the total supply of the asset changes":
@@ -184,32 +184,32 @@ suite "wallet: accepting payments":
     var balances = payment.state.outcome.balances(asset).get
     balances[payer.destination] += 10.u256
     payment.state.outcome.update(asset, balances)
-    check receiver.acceptPayment(channel, asset, payer.address, payment).isErr
+    check receiver.acceptPayment(channel, asset, payer.address, payment).isFailure
 
   test "fails without a signature":
     var payment = payer.pay(channel, asset, receiver.address, 10.u256).get
     payment.signatures = @[]
-    check receiver.acceptPayment(channel, asset, payer.address, payment).isErr
+    check receiver.acceptPayment(channel, asset, payer.address, payment).isFailure
 
   test "fails with an incorrect signature":
     var payment = payer.pay(channel, asset, receiver.address, 10.u256).get
     payment.signatures = @[Signature.example]
-    check receiver.acceptPayment(channel, asset, payer.address, payment).isErr
+    check receiver.acceptPayment(channel, asset, payer.address, payment).isFailure
 
   test "fails when channel is unknown":
     let newChannel = payer.openLedgerChannel(
       receiver.address, chainId, nonce + 1, asset, 100.u256).get
     let payment = payer.pay(newChannel, asset, receiver.address, 10.u256).get
-    check receiver.acceptPayment(newChannel, asset, payer.address, payment).isErr
+    check receiver.acceptPayment(newChannel, asset, payer.address, payment).isFailure
 
   test "fails when payment does not match channel":
     let newChannel = payer.openLedgerChannel(
       receiver.address, chainId, nonce + 1, asset, 100.u256).get
     let payment = payer.pay(newChannel, asset, receiver.address, 10.u256).get
-    check receiver.acceptPayment(channel, asset, payer.address, payment).isErr
+    check receiver.acceptPayment(channel, asset, payer.address, payment).isFailure
 
   test "fails when state is updated in unrelated areas":
     var payment = payer.pay(channel, asset, receiver.address, 10.u256).get
     payment.state.appDefinition = EthAddress.example
     payment.signatures = @[payerKey.sign(payment.state)]
-    check receiver.acceptPayment(channel, asset, payer.address, payment).isErr
+    check receiver.acceptPayment(channel, asset, payer.address, payment).isFailure
