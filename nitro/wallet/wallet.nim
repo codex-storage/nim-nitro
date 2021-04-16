@@ -150,16 +150,16 @@ func pay*(wallet: var Wallet,
           asset: EthAddress,
           receiver: Destination,
           amount: UInt256): ?!SignedState =
-  if var state =? wallet.state(channel):
-    if var balances =? state.outcome.balances(asset):
-      ?balances.move(wallet.destination, receiver, amount)
-      state.outcome.update(asset, balances)
-      wallet.updateChannel(SignedState(state: state))
-      success wallet.channels.?[channel].get
-    else:
-      failure "asset not found"
-  else:
-    failure "channel not found"
+  without var state =? wallet.state(channel):
+    return failure "channel not found"
+
+  without var balances =? state.outcome.balances(asset):
+    return failure "asset not found"
+
+  ?balances.move(wallet.destination, receiver, amount)
+  state.outcome.update(asset, balances)
+  wallet.updateChannel(SignedState(state: state))
+  success wallet.channels.?[channel].get
 
 func pay*(wallet: var Wallet,
           channel: ChannelId,
@@ -192,13 +192,13 @@ func acceptPayment*(wallet: var Wallet,
   if not payment.isSignedBy(sender):
     return failure "missing signature on payment"
 
-  if updatedBalances =? payment.state.outcome.balances(asset):
-    var expectedState: State = wallet.channels.?[channel].?state.get
-    expectedState.outcome.update(asset, updatedBalances)
-    if payment.state != expectedState:
-      return failure "payment has unexpected changes in state"
-  else:
+  without updatedBalances =? payment.state.outcome.balances(asset):
     return failure "payment misses balances for asset"
+
+  var expectedState: State = wallet.channels.?[channel].?state.get
+  expectedState.outcome.update(asset, updatedBalances)
+  if payment.state != expectedState:
+    return failure "payment has unexpected changes in state"
 
   wallet.channels[channel] = payment
   success()
