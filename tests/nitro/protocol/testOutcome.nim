@@ -90,31 +90,31 @@ suite "outcome":
     let outcome = Outcome(@[
       AssetOutcome(
         kind: allocationType,
-        assetHolder: EthAddress.parse(
+        assetHolder: !EthAddress.parse(
           "1E90B49563da16D2537CA1Ddd9b1285279103D93"
-        ).get(),
+        ),
         allocation: Allocation(@[
           (
-            destination: Destination.parse(
+            destination: !Destination.parse(
               "f1918e8562236eb17adc8502332f4c9c82bc14e19bfc0aa10ab674ff75b3d2f3"
-            ).get(),
+            ),
             amount: 0x05.u256
           )
         ])
       ),
       AssetOutcome(
         kind: guaranteeType,
-        assetHolder: EthAddress.parse(
+        assetHolder: !EthAddress.parse(
           "1E90B49563da16D2537CA1Ddd9b1285279103D93"
-        ).get(),
+        ),
         guarantee: Guarantee(
-          targetChannelId: Destination.parse(
+          targetChannelId: !Destination.parse(
             "cac1bb71f0a97c8ac94ca9546b43178a9ad254c7b757ac07433aa6df35cd8089"
-          ).get(),
+          ),
           destinations: @[
-            Destination.parse(
+            !Destination.parse(
               "f1918e8562236eb17adc8502332f4c9c82bc14e19bfc0aa10ab674ff75b3d2f3"
-            ).get()
+            )
           ]
         )
       )

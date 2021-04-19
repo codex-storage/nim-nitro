@@ -40,7 +40,7 @@ suite "signature":
         chainId: 0x1.u256,
         nonce: 1,
         participants: @[
-          EthAddress.parse("0x8a64E10FF40Bc9C90EA5750313dB5e036495c10E").get()
+          !EthAddress.parse("0x8a64E10FF40Bc9C90EA5750313dB5e036495c10E")
         ]
       ),
       outcome: Outcome(@[]),
@@ -50,12 +50,12 @@ suite "signature":
       appDefinition: EthAddress.default,
       challengeDuration: 5
     )
-    let seckey = EthPrivateKey.parse(
+    let seckey = !EthPrivateKey.parse(
       "41b0f5f91967dded8af487277874f95116094cc6004ac2b2169b5b6a87608f3e"
-    ).get()
-    let expected = Signature.parse(
+    )
+    let expected = !Signature.parse(
       "9b966cf0065586d59c8b9eb475ac763c96ad8316b81061238f32968a631f9e21" &
       "251363c193c78c89b3eb2fec23f0ea5c3c72acff7d1f27430cfb84b9da9831fb" &
       "1c"
-    ).get()
+    )
     check seckey.sign(state) == expected

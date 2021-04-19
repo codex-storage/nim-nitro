@@ -52,7 +52,7 @@ suite "state":
         chainId: 0x1.u256,
         nonce: 1,
         participants: @[
-          EthAddress.parse("DBE821484648c73C1996Da25f2355342B9803eBD").get()
+          !EthAddress.parse("DBE821484648c73C1996Da25f2355342B9803eBD")
         ]
       ),
       outcome: Outcome(@[]),

@@ -159,7 +159,7 @@ func pay*(wallet: var Wallet,
   ?balances.move(wallet.destination, receiver, amount)
   state.outcome.update(asset, balances)
   wallet.updateChannel(SignedState(state: state))
-  success wallet.channels.?[channel].get
+  success !wallet.latestSignedState(channel)
 
 func pay*(wallet: var Wallet,
           channel: ChannelId,
@@ -195,7 +195,7 @@ func acceptPayment*(wallet: var Wallet,
   without updatedBalances =? payment.state.outcome.balances(asset):
     return failure "payment misses balances for asset"
 
-  var expectedState: State = wallet.channels.?[channel].?state.get
+  var expectedState: State = !wallet.state(channel)
   expectedState.outcome.update(asset, updatedBalances)
   if payment.state != expectedState:
     return failure "payment has unexpected changes in state"

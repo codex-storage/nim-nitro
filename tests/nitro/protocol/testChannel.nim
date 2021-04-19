@@ -22,10 +22,10 @@ suite "channel definition":
       chainId: 9001.u256,
       nonce: 1,
       participants: @[
-        EthAddress.parse("24b905Dcc8A11C0FE57C2592f3D25f0447402C10").get()
+        !EthAddress.parse("24b905Dcc8A11C0FE57C2592f3D25f0447402C10")
       ]
     )
-    let expected = Destination.parse(
+    let expected = !Destination.parse(
       "4f8cce57e9fe88edaab05234972eaf0c2d183e4f6b175aff293375fbe4d5d7cc"
-    ).get()
+    )
     check getChannelId(channel) == expected
