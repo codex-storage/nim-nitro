@@ -213,3 +213,19 @@ suite "wallet: accepting payments":
     payment.state.appDefinition = EthAddress.example
     payment.signatures = @[payerKey.sign(payment.state)]
     check receiver.acceptPayment(channel, asset, payer.address, payment).isFailure
+
+suite "wallet reference type":
+
+  let asset = EthAddress.example
+  let amount = 42.u256
+  let chainId = UInt256.example
+
+  test "wallet can also be used as a reference type":
+    let wallet1 = WalletRef.new(EthPrivateKey.random())
+    let wallet2 = WalletRef.new(EthPrivateKey.random())
+    let address1 = wallet1.address
+    let address2 = wallet2.address
+    let channel = !wallet1.openLedgerChannel(address2, chainId, asset, amount)
+    check !wallet2.acceptChannel(!wallet1.latestSignedState(channel)) == channel
+    let payment = !wallet1.pay(channel, asset, address2, amount)
+    check wallet2.acceptPayment(channel, asset, address1, payment).isSuccess

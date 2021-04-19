@@ -6,6 +6,7 @@ import ./signedstate
 import ./ledger
 import ./balances
 import ./nonces
+import ./deref
 
 push: {.upraises:[].}
 
@@ -19,21 +20,25 @@ type
     key: EthPrivateKey
     channels: Table[ChannelId, SignedState]
     nonces: Nonces
+  WalletRef* = ref Wallet
   ChannelId* = Destination
   Payment* = tuple
     destination: Destination
     amount: UInt256
 
 func init*(_: type Wallet, key: EthPrivateKey): Wallet =
-  result.key = key
+  Wallet(key: key)
 
-func publicKey*(wallet: Wallet): EthPublicKey =
+func new*(_: type WalletRef, key: EthPrivateKey): WalletRef =
+  WalletRef(key: key)
+
+func publicKey*(wallet: Wallet): EthPublicKey {.deref.} =
   wallet.key.toPublicKey
 
-func address*(wallet: Wallet): EthAddress =
+func address*(wallet: Wallet): EthAddress {.deref.} =
   wallet.publicKey.toAddress
 
-func destination*(wallet: Wallet): Destination =
+func destination*(wallet: Wallet): Destination {.deref.}=
   wallet.address.toDestination
 
 func sign(wallet: Wallet, state: SignedState): SignedState =
@@ -63,7 +68,7 @@ func openLedgerChannel*(wallet: var Wallet,
                         chainId: UInt256,
                         nonce: UInt48,
                         asset: EthAddress,
-                        amount: UInt256): ?!ChannelId =
+                        amount: UInt256): ?!ChannelId {.deref.} =
   let state = startLedger(wallet.address, hub, chainId, nonce, asset, amount)
   wallet.createChannel(state)
 
@@ -71,11 +76,12 @@ func openLedgerChannel*(wallet: var Wallet,
                         hub: EthAddress,
                         chainId: UInt256,
                         asset: EthAddress,
-                        amount: UInt256): ?!ChannelId =
+                        amount: UInt256): ?!ChannelId {.deref.} =
   let nonce = wallet.nonces.getNonce(chainId, wallet.address, hub)
   openLedgerChannel(wallet, hub, chainId, nonce, asset, amount)
 
-func acceptChannel*(wallet: var Wallet, signed: SignedState): ?!ChannelId =
+func acceptChannel*(wallet: var Wallet,
+                    signed: SignedState): ?!ChannelId {.deref.} =
   if not signed.hasParticipant(wallet.address):
     return failure "wallet owner is not a participant"
 
@@ -84,18 +90,21 @@ func acceptChannel*(wallet: var Wallet, signed: SignedState): ?!ChannelId =
 
   wallet.createChannel(signed)
 
-func latestSignedState*(wallet: Wallet, channel: ChannelId): ?SignedState =
+func latestSignedState*(wallet: Wallet,
+                        channel: ChannelId): ?SignedState {.deref.} =
   wallet.channels.?[channel]
 
-func state*(wallet: Wallet, channel: ChannelId): ?State =
+func state*(wallet: Wallet,
+            channel: ChannelId): ?State {.deref.} =
   wallet.latestSignedState(channel).?state
 
-func signatures*(wallet: Wallet, channel: ChannelId): ?seq[Signature] =
+func signatures*(wallet: Wallet,
+                 channel: ChannelId): ?seq[Signature] {.deref.} =
   wallet.latestSignedState(channel).?signatures
 
 func signature*(wallet: Wallet,
                 channel: ChannelId,
-                address: EthAddress): ?Signature =
+                address: EthAddress): ?Signature {.deref.} =
   if signed =? wallet.latestSignedState(channel):
     for signature in signed.signatures:
       if signer =? signature.recover(signed.state):
@@ -117,7 +126,7 @@ func balance(state: State,
 func balance*(wallet: Wallet,
               channel: ChannelId,
               asset: EthAddress,
-              destination: Destination): UInt256 =
+              destination: Destination): UInt256 {.deref.} =
   if state =? wallet.state(channel):
     state.balance(asset, destination)
   else:
@@ -126,10 +135,12 @@ func balance*(wallet: Wallet,
 func balance*(wallet: Wallet,
               channel: ChannelId,
               asset: EthAddress,
-              address: EthAddress): UInt256 =
+              address: EthAddress): UInt256 {.deref.} =
   wallet.balance(channel, asset, address.toDestination)
 
-func balance*(wallet: Wallet, channel: ChannelId, asset: EthAddress): UInt256 =
+func balance*(wallet: Wallet,
+              channel: ChannelId,
+              asset: EthAddress): UInt256 {.deref.} =
   wallet.balance(channel, asset, wallet.address)
 
 func total(state: State, asset: EthAddress): UInt256 =
@@ -149,7 +160,7 @@ func pay*(wallet: var Wallet,
           channel: ChannelId,
           asset: EthAddress,
           receiver: Destination,
-          amount: UInt256): ?!SignedState =
+          amount: UInt256): ?!SignedState {.deref.} =
   without var state =? wallet.state(channel):
     return failure "channel not found"
 
@@ -165,14 +176,14 @@ func pay*(wallet: var Wallet,
           channel: ChannelId,
           asset: EthAddress,
           receiver: EthAddress,
-          amount: UInt256): ?!SignedState =
+          amount: UInt256): ?!SignedState {.deref.} =
   wallet.pay(channel, asset, receiver.toDestination, amount)
 
 func acceptPayment*(wallet: var Wallet,
                     channel: ChannelId,
                     asset: EthAddress,
                     sender: EthAddress,
-                    payment: SignedState): ?!void =
+                    payment: SignedState): ?!void {.deref.} =
   if not wallet.channels.contains(channel):
     return failure "unknown channel"
 
