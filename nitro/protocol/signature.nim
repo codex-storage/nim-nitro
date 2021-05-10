@@ -43,8 +43,7 @@ func `$`*(signature: Signature): string =
   bytes.toHex()
 
 func parse*(_: type Signature, s: string): ?Signature =
-  let signature = catch:
-    var bytes = array[65, byte].fromHex(s)
-    bytes[64] = bytes[64] - 27
-    SkRecoverableSignature.fromRaw(bytes).get()
-  signature.option
+  without var bytes =? array[65, byte].fromHex(s).catch:
+    return Signature.none
+  bytes[64] = bytes[64] - 27
+  SkRecoverableSignature.fromRaw(bytes).option

@@ -46,25 +46,21 @@ func expectKind(node: JsonNode, kind: JsonNodeKind) =
 
 func initFromJson*(bytes: var seq[byte], node: JsonNode, _: var string) =
   node.expectKind(JString)
-  let parsed = seq[byte].fromHex(node.getStr)
-  if parsed.isOk:
-    bytes = parsed.get
-  else:
+  without parsed =? seq[byte].fromHex(node.getStr):
     raise newException(ValueError, "invalid hex string")
+  bytes = parsed
 
 func initFromJson*(address: var EthAddress, node: JsonNode, _: var string) =
   node.expectKind(JString)
-  if parsed =? EthAddress.parse(node.getStr):
-    address = parsed
-  else:
+  without parsed =? EthAddress.parse(node.getStr):
     raise newException(ValueError, "invalid ethereum address")
+  address = parsed
 
 func initFromJson*(dest: var Destination, node: JsonNode, _: var string) =
   node.expectKind(JString)
-  if parsed =? Destination.parse(node.getStr):
-    dest = parsed
-  else:
+  without parsed =? Destination.parse(node.getStr):
     raise newException(ValueError, "invalid nitro destination")
+  dest = parsed
 
 func initFromJson*(number: var UInt256, node: JsonNode, _: var string) =
   node.expectKind(JString)
@@ -72,10 +68,9 @@ func initFromJson*(number: var UInt256, node: JsonNode, _: var string) =
 
 func initFromJson*(signature: var Signature, node: JsonNode, _: var string) =
   node.expectKind(JString)
-  if parsed =? Signature.parse(node.getStr):
-    signature = parsed
-  else:
+  without parsed =? Signature.parse(node.getStr):
     raise newException(ValueError, "invalid signature")
+  signature = parsed
 
 {.pop.}
 

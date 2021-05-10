@@ -115,22 +115,17 @@ func signature*(wallet: Wallet,
 func balance(state: State,
              asset: EthAddress,
              destination: Destination): UInt256 =
-  if balances =? state.outcome.balances(asset):
-    if balance =? balances.?[destination]:
-      balance
-    else:
-      0.u256
-  else:
-    0.u256
+  without balance =? state.outcome.balances(asset).?[destination]:
+    return 0.u256
+  balance
 
 func balance*(wallet: Wallet,
               channel: ChannelId,
               asset: EthAddress,
               destination: Destination): UInt256 {.deref.} =
-  if state =? wallet.state(channel):
-    state.balance(asset, destination)
-  else:
-    0.u256
+  without state =? wallet.state(channel):
+    return 0.u256
+  state.balance(asset, destination)
 
 func balance*(wallet: Wallet,
               channel: ChannelId,
@@ -151,10 +146,9 @@ func total(state: State, asset: EthAddress): UInt256 =
   total
 
 func total(wallet: Wallet, channel: ChannelId, asset: EthAddress): UInt256 =
-  if state =? wallet.state(channel):
-    state.total(asset)
-  else:
-    0.u256
+  without state =? wallet.state(channel):
+    return 0.u256
+  state.total(asset)
 
 func pay*(wallet: var Wallet,
           channel: ChannelId,
