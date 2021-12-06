@@ -6,31 +6,20 @@ suite "outcome":
 
   test "encodes guarantees":
     let guarantee = Guarantee.example
-    var encoder= AbiEncoder.init()
-    encoder.startTuple()
-    encoder.startTuple()
-    encoder.write(guarantee.targetChannelId)
-    encoder.write(guarantee.destinations)
-    encoder.finishTuple()
-    encoder.finishTuple()
-    check AbiEncoder.encode(guarantee) == encoder.finish()
+    let expected = AbiEncoder.encode:
+      ((guarantee.targetChannelId, guarantee.destinations),)
+    check AbiEncoder.encode(guarantee) == expected
 
   test "encodes allocation items":
     let item = AllocationItem.example
-    var encoder= AbiEncoder.init()
-    encoder.startTuple()
-    encoder.write(item.destination)
-    encoder.write(item.amount)
-    encoder.finishTuple()
-    check AbiEncoder.encode(item) == encoder.finish()
+    let expected = AbiEncoder.encode: (item.destination, item.amount)
+    check AbiEncoder.encode(item) == expected
 
   test "encodes allocation":
     let allocation = Allocation.example
-    var encoder= AbiEncoder.init()
-    encoder.startTuple()
-    encoder.write(seq[AllocationItem](allocation))
-    encoder.finishTuple()
-    check AbiEncoder.encode(allocation) == encoder.finish()
+    let expected = AbiEncoder.encode:
+      (seq[AllocationItem](allocation),)
+    check AbiEncoder.encode(allocation) == expected
 
   test "encodes allocation outcome":
     let assetOutcome = AssetOutcome(
@@ -38,19 +27,11 @@ suite "outcome":
       assetHolder: EthAddress.example,
       allocation: Allocation.example
     )
-    var content= AbiEncoder.init()
-    content.startTuple()
-    content.startTuple()
-    content.write(allocationType)
-    content.write(AbiEncoder.encode(assetOutcome.allocation))
-    content.finishTuple()
-    content.finishTuple()
-    var encoder= AbiEncoder.init()
-    encoder.startTuple()
-    encoder.write(assetOutcome.assetHolder)
-    encoder.write(content.finish())
-    encoder.finishTuple()
-    check AbiEncoder.encode(assetOutcome) == encoder.finish()
+    let content = AbiEncoder.encode:
+      ((allocationType, AbiEncoder.encode(assetOutcome.allocation)),)
+    let expected = AbiEncoder.encode:
+      (assetOutcome.assetHolder, content)
+    check AbiEncoder.encode(assetOutcome) == expected
 
   test "encodes guarantee outcome":
     let assetOutcome = AssetOutcome(
@@ -58,27 +39,17 @@ suite "outcome":
       assetHolder: EthAddress.example,
       guarantee: Guarantee.example
     )
-    var content= AbiEncoder.init()
-    content.startTuple()
-    content.startTuple()
-    content.write(guaranteeType)
-    content.write(AbiEncoder.encode(assetOutcome.guarantee))
-    content.finishTuple()
-    content.finishTuple()
-    var encoder= AbiEncoder.init()
-    encoder.startTuple()
-    encoder.write(assetOutcome.assetHolder)
-    encoder.write(content.finish())
-    encoder.finishTuple()
-    check AbiEncoder.encode(assetOutcome) == encoder.finish()
+    let content = AbiEncoder.encode:
+      ((guaranteeType, AbiEncoder.encode(assetOutcome.guarantee)),)
+    let expected = AbiEncoder.encode:
+      (assetOutcome.assetHolder, content)
+    check AbiEncoder.encode(assetOutcome) == expected
 
   test "encodes outcomes":
     let outcome = Outcome.example()
-    var encoder= AbiEncoder.init()
-    encoder.startTuple()
-    encoder.write(seq[AssetOutcome](outcome))
-    encoder.finishTuple()
-    check AbiEncoder.encode(outcome) == encoder.finish()
+    let expected = AbiEncoder.encode:
+      (seq[AssetOutcome](outcome),)
+    check AbiEncoder.encode(outcome) == expected
 
   test "hashes outcomes":
     let outcome = Outcome.example

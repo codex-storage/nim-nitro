@@ -23,26 +23,20 @@ suite "state":
     )
 
   test "hashes app part of state":
-    var encoder= AbiEncoder.init()
-    encoder.startTuple()
-    encoder.write(state.challengeDuration)
-    encoder.write(state.appDefinition)
-    encoder.write(state.appData)
-    encoder.finishTuple()
-    let encoded = encoder.finish()
+    let encoded = AbiEncoder.encode:
+      (state.challengeDuration, state.appDefinition, state.appData)
     let hashed = keccak256.digest(encoded).data
     check hashAppPart(state) == hashed
 
   test "hashes state":
-    var encoder= AbiEncoder.init()
-    encoder.startTuple()
-    encoder.write(state.turnNum)
-    encoder.write(state.isFinal)
-    encoder.write(getChannelId(state.channel))
-    encoder.write(hashAppPart(state))
-    encoder.write(hashOutcome(state.outcome))
-    encoder.finishTuple()
-    let encoded = encoder.finish()
+    let encoded = AbiEncoder.encode:
+      (
+        state.turnNum,
+        state.isFinal,
+        getChannelId(state.channel),
+        hashAppPart(state),
+        hashOutcome(state.outcome)
+      )
     let hashed = keccak256.digest(encoded).data
     check hashState(state) == hashed
 

@@ -45,21 +45,17 @@ func variablePart*(state: State): VariablePart =
   )
 
 func hashAppPart*(state: State): array[32, byte] =
-  var encoder= AbiEncoder.init()
-  encoder.startTuple()
-  encoder.write(state.challengeDuration)
-  encoder.write(state.appDefinition)
-  encoder.write(state.appData)
-  encoder.finishTuple()
-  keccak256.digest(encoder.finish).data
+  let encoding = AbiEncoder.encode:
+    (state.challengeDuration, state.appDefinition, state.appData)
+  keccak256.digest(encoding).data
 
 func hashState*(state: State): array[32, byte] =
-  var encoder= AbiEncoder.init()
-  encoder.startTuple()
-  encoder.write(state.turnNum)
-  encoder.write(state.isFinal)
-  encoder.write(getChannelId(state.channel))
-  encoder.write(hashAppPart(state))
-  encoder.write(hashOutcome(state.outcome))
-  encoder.finishTuple()
-  keccak256.digest(encoder.finish).data
+  let encoding = AbiEncoder.encode:
+    (
+      state.turnNum,
+      state.isFinal,
+      getChannelId(state.channel),
+      hashAppPart(state),
+      hashOutcome(state.outcome)
+    )
+  keccak256.digest(encoding).data

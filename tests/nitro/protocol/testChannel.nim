@@ -7,13 +7,8 @@ suite "channel definition":
   let channel = ChannelDefinition.example
 
   test "calculates channel id":
-    var encoder= AbiEncoder.init()
-    encoder.startTuple()
-    encoder.write(channel.chainId)
-    encoder.write(channel.participants)
-    encoder.write(channel.nonce)
-    encoder.finishTuple()
-    let encoded = encoder.finish()
+    let encoded = AbiEncoder.encode:
+      (channel.chainId, channel.participants, channel.nonce)
     let hashed = keccak256.digest(encoded).data
     check getChannelId(channel) == Destination(hashed)
 

@@ -52,46 +52,25 @@ func `==`*(a, b: AssetOutcome): bool =
 proc `==`*(a, b: Outcome): bool {.borrow.}
 
 func encode*(encoder: var AbiEncoder, guarantee: Guarantee) =
-  encoder.startTuple()
-  encoder.startTuple()
-  encoder.write(guarantee.targetChannelId)
-  encoder.write(guarantee.destinations)
-  encoder.finishTuple()
-  encoder.finishTuple()
-
-func encode*(encoder: var AbiEncoder, item: AllocationItem) =
-  encoder.startTuple()
-  encoder.write(item.destination)
-  encoder.write(item.amount)
-  encoder.finishTuple()
+  encoder.write:
+    ( (guarantee.targetChannelId, guarantee.destinations), )
 
 func encode*(encoder: var AbiEncoder, allocation: Allocation) =
-  encoder.startTuple()
-  encoder.write(seq[AllocationItem](allocation))
-  encoder.finishTuple()
+  encoder.write: (seq[AllocationItem](allocation),)
 
 func encode*(encoder: var AbiEncoder, assetOutcome: AssetOutcome) =
-  var content= AbiEncoder.init()
-  content.startTuple()
-  content.startTuple()
-  content.write(assetOutcome.kind)
+  var content: seq[byte]
   case assetOutcome.kind:
   of allocationType:
-    content.write(AbiEncoder.encode(assetOutcome.allocation))
+    content = AbiEncoder.encode:
+      ( (assetOutcome.kind, ABiEncoder.encode(assetOutcome.allocation)), )
   of guaranteeType:
-    content.write(AbiEncoder.encode(assetOutcome.guarantee))
-  content.finishTuple()
-  content.finishTuple()
-
-  encoder.startTuple()
-  encoder.write(assetOutcome.assetHolder)
-  encoder.write(content.finish())
-  encoder.finishTuple()
+    content = AbiEncoder.encode:
+      ( (assetOutcome.kind, AbiEncoder.encode(assetOutcome.guarantee)), )
+  encoder.write( (assetOutcome.assetHolder, content) )
 
 func encode*(encoder: var AbiEncoder, outcome: Outcome) =
-  encoder.startTuple()
-  encoder.write(seq[AssetOutcome](outcome))
-  encoder.finishTuple()
+  encoder.write: (seq[AssetOutcome](outcome),)
 
 func hashOutcome*(outcome: Outcome): array[32, byte] =
   keccak256.digest(AbiEncoder.encode(outcome)).data

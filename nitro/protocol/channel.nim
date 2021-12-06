@@ -13,10 +13,6 @@ type
     chainId*: UInt256
 
 func getChannelId*(channel: ChannelDefinition): Destination =
-  var encoder= AbiEncoder.init()
-  encoder.startTuple()
-  encoder.write(channel.chainId)
-  encoder.write(channel.participants)
-  encoder.write(channel.nonce)
-  encoder.finishTuple()
-  Destination(keccak256.digest(encoder.finish()).data)
+  let encoding = AbiEncoder.encode:
+     (channel.chainId, channel.participants, channel.nonce)
+  Destination(keccak256.digest(encoding).data)
