@@ -40,7 +40,7 @@ suite "signature":
         chainId: 0x1.u256,
         nonce: 1,
         participants: @[
-          !EthAddress.parse("0x8a64E10FF40Bc9C90EA5750313dB5e036495c10E")
+          !EthAddress.init("0x8a64E10FF40Bc9C90EA5750313dB5e036495c10E")
         ]
       ),
       outcome: Outcome(@[]),

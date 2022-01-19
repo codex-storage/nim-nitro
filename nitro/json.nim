@@ -52,7 +52,7 @@ func initFromJson*(bytes: var seq[byte], node: JsonNode, _: var string) =
 
 func initFromJson*(address: var EthAddress, node: JsonNode, _: var string) =
   node.expectKind(JString)
-  without parsed =? EthAddress.parse(node.getStr):
+  without parsed =? EthAddress.init(node.getStr):
     raise newException(ValueError, "invalid ethereum address")
   address = parsed
 

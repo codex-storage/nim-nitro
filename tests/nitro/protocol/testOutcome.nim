@@ -61,7 +61,7 @@ suite "outcome":
     let outcome = Outcome(@[
       AssetOutcome(
         kind: allocationType,
-        assetHolder: !EthAddress.parse(
+        assetHolder: !EthAddress.init(
           "1E90B49563da16D2537CA1Ddd9b1285279103D93"
         ),
         allocation: Allocation(@[
@@ -75,7 +75,7 @@ suite "outcome":
       ),
       AssetOutcome(
         kind: guaranteeType,
-        assetHolder: !EthAddress.parse(
+        assetHolder: !EthAddress.init(
           "1E90B49563da16D2537CA1Ddd9b1285279103D93"
         ),
         guarantee: Guarantee(
