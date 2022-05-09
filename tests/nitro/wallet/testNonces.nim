@@ -4,7 +4,7 @@ import pkg/nitro/wallet/nonces
 suite "nonces":
 
   let chainId = UInt256.example
-  let participants = seq[EthAddress].example
+  let participants = seq[EthAddress].example(1..5)
 
   var nonces: Nonces
 
@@ -27,7 +27,7 @@ suite "nonces":
     check nonces.getNonce(chainId, participants) == 102
 
   test "nonces are different when participants differ":
-    let otherParticipants = seq[EthAddress].example
+    let otherParticipants = seq[EthAddress].example(1..5)
     nonces.incNonce(0, chainId, participants)
     check nonces.getNonce(chainId, otherParticipants) == 0
 
